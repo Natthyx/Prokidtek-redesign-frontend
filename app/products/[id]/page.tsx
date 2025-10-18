@@ -49,12 +49,15 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
 
   const relatedProducts = products.filter((p) => p.category === product.category && p.id !== product.id)
 
+  const images = product.images || [product.image || "/placeholder.svg"]
+  const specs = product.specs || []
+
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % product.images.length)
+    setCurrentImageIndex((prev) => (prev + 1) % images.length)
   }
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length)
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
   }
 
   const handleSubmitRating = () => {
@@ -80,12 +83,14 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
             <div className="flex flex-col gap-6">
               <div className="relative">
                 <img
-                  src={product.images[currentImageIndex] || "/placeholder.svg"}
+                  src={images[currentImageIndex] || "/placeholder.svg"}
                   alt={product.name}
                   className="w-full h-96 rounded-3xl object-cover transition-all duration-500 transform hover:scale-105"
                 />
 
-                {/* Image Navigation */}
+                {/* Image Navigation - Only show if more than 1 image */}
+                {images.length > 1 && (
+                  <>
                 <button
                   onClick={prevImage}
                   className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110"
@@ -98,11 +103,14 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                 >
                   <ChevronRight className="w-6 h-6 text-black" />
                 </button>
+                  </>
+                )}
               </div>
 
-              {/* Thumbnail Gallery */}
+              {/* Thumbnail Gallery - Only show if more than 1 image */}
+              {images.length > 1 && (
               <div className="flex gap-4">
-                {product.images.map((img, idx) => (
+                  {images.map((img, idx) => (
                   <button
                     key={idx}
                     onClick={() => setCurrentImageIndex(idx)}
@@ -118,6 +126,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                   </button>
                 ))}
               </div>
+              )}
             </div>
 
             {/* Product Info */}
@@ -144,19 +153,21 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
               <p className="text-lg text-foreground/80 mb-8 leading-relaxed">{product.fullDescription}</p>
 
               {/* Specs */}
-              <div className="mb-8">
-                <h3 className="text-lg font-bold text-foreground mb-4">Key Specifications</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {product.specs.map((spec, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-muted/50 p-4 rounded-2xl hover:bg-muted transition-colors duration-300"
-                    >
-                      <p className="text-sm text-foreground/70">{spec}</p>
-                    </div>
-                  ))}
+              {specs.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-lg font-bold text-foreground mb-4">Key Specifications</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {specs.map((spec, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-muted/50 p-4 rounded-2xl hover:bg-muted transition-colors duration-300"
+                      >
+                        <p className="text-sm text-foreground/70">{spec}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <button className="w-full border-2 border-primary text-primary px-8 py-4 rounded-full hover:bg-primary/10 transition-all duration-300 font-bold text-lg transform hover:scale-105">
                 Learn More
@@ -164,28 +175,11 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
             </div>
           </div>
 
-          {/* Reviews Section */}
+          {/* Reviews Section - Placeholder for future implementation */}
           <div className="mb-16 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
             <h2 className="text-3xl font-bold text-foreground mb-8">Customer Reviews</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              {product.reviewsList.map((review, idx) => (
-                <div
-                  key={idx}
-                  className="bg-card border-2 border-border rounded-3xl p-6 hover:shadow-lg transition-all duration-500 transform hover:scale-105 shadow-lg"
-                  style={{ animationDelay: `${300 + idx * 100}ms` }}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${i < review.rating ? "fill-primary text-primary" : "text-foreground/30"}`}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-foreground/80 mb-4">{review.text}</p>
-                  <p className="font-semibold text-foreground">{review.author}</p>
-                </div>
-              ))}
+            <div className="text-center py-12">
+              <p className="text-foreground/60 text-lg">Customer reviews will be displayed here once they are submitted.</p>
             </div>
           </div>
 

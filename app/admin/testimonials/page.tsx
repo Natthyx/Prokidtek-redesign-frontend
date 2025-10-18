@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Plus, Edit2, Trash2, X } from "lucide-react"
+import FileUpload from "@/components/ui/file-upload"
 
 interface Testimonial {
   id: string
@@ -208,13 +209,11 @@ export default function TestimonialsAdmin() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Logo (Emoji)</label>
-                <input
-                  type="text"
+                <label className="block text-sm font-medium text-foreground mb-2">Company Logo</label>
+                <FileUpload
                   value={formData.logo}
-                  onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Enter emoji (e.g., 🏢)"
+                  onChange={(value) => setFormData({ ...formData, logo: value })}
+                  placeholder="Choose a company logo"
                 />
               </div>
 

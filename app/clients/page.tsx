@@ -21,6 +21,12 @@ export default function ClientsPage() {
       <div className="bg-white">
         <ClientTestimonials />
       </div>
+      {/* Visual Separation */}
+      <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 py-8">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent rounded-full"></div>
+        </div>
+      </div>
       <div className="bg-primary/5">
         <ClientBenefits />
       </div>

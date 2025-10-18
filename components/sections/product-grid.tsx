@@ -18,15 +18,16 @@ export default function ProductGrid() {
   if (loading) {
     return (
       <section className="py-20 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[...Array(8)].map((_, idx) => (
-              <div key={idx} className="bg-card rounded-3xl overflow-hidden border-2 border-border animate-pulse">
-                <div className="h-40 bg-muted"></div>
-                <div className="p-6 space-y-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {[...Array(10)].map((_, idx) => (
+              <div key={idx} className="bg-card rounded-2xl overflow-hidden border-2 border-border animate-pulse">
+                <div className="h-28 bg-muted"></div>
+                <div className="p-4 space-y-3">
+                  <div className="h-3 bg-muted rounded"></div>
                   <div className="h-4 bg-muted rounded"></div>
-                  <div className="h-6 bg-muted rounded"></div>
-                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="h-3 bg-muted rounded w-3/4"></div>
+                  <div className="h-3 bg-muted rounded w-1/2"></div>
                 </div>
               </div>
             ))}
@@ -39,7 +40,7 @@ export default function ProductGrid() {
   if (error) {
     return (
       <section className="py-20 px-4">
-        <div className="max-w-6xl mx-auto text-center">
+        <div className="max-w-7xl mx-auto text-center">
           <p className="text-red-500">Error loading products: {error}</p>
         </div>
       </section>
@@ -48,8 +49,8 @@ export default function ProductGrid() {
 
   return (
     <section className="py-20 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6">
           {filteredProducts.map((product, idx) => (
             <Link
               key={product.id}
@@ -61,34 +62,34 @@ export default function ProductGrid() {
                 transitionDelay: `${idx * 100}ms`,
               }}
             >
-              <div className="bg-card rounded-3xl overflow-hidden border-2 border-border hover:shadow-2xl transition-all duration-500 transform hover:scale-105 h-full flex flex-col">
-                <div className="h-40 bg-muted relative overflow-hidden group-hover:scale-110 transition-transform duration-500">
+              <div className="bg-card rounded-2xl overflow-hidden border-2 border-border hover:shadow-2xl transition-all duration-500 transform hover:scale-105 h-full flex flex-col">
+                <div className="h-28 bg-muted relative overflow-hidden group-hover:scale-110 transition-transform duration-500">
                   <img
                     src={product.image || "/placeholder.svg"}
                     alt={product.name}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="p-6 flex flex-col flex-grow">
-                  <p className="text-sm text-primary font-semibold mb-2 uppercase tracking-wide">{product.category}</p>
-                  <h3 className="font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
+                <div className="p-4 flex flex-col flex-grow">
+                  <p className="text-xs text-primary font-semibold mb-1 uppercase tracking-wide">{product.category}</p>
+                  <h3 className="font-bold text-base text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
                     {product.name}
                   </h3>
-                  <p className="text-foreground/70 text-sm mb-4">{product.description}</p>
-                  <div className="space-y-2 mb-6 flex-grow">
-                    {product.specs.map((spec, idx) => (
+                  <p className="text-foreground/70 text-xs mb-3 line-clamp-2">{product.description}</p>
+                  <div className="space-y-1 mb-4 flex-grow">
+                    {product.specs.slice(0, 2).map((spec, idx) => (
                       <p key={idx} className="text-xs text-foreground/60">
                         • {spec}
                       </p>
                     ))}
                   </div>
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-1">
-                      <span className="text-sm font-semibold text-foreground">{product.rating}</span>
+                      <span className="text-xs font-semibold text-foreground">{product.rating}</span>
                       <span className="text-xs text-foreground/60">({product.reviews})</span>
                     </div>
                   </div>
-                  <button className="w-full bg-primary text-primary-foreground px-4 py-3 rounded-full hover:bg-accent transition-all duration-300 font-bold transform hover:scale-105 group-hover:shadow-lg">
+                  <button className="w-full bg-primary text-primary-foreground px-3 py-2 rounded-full hover:bg-accent transition-all duration-300 font-bold text-sm transform hover:scale-105 group-hover:shadow-lg">
                     View Details
                   </button>
                 </div>

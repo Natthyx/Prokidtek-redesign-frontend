@@ -62,11 +62,26 @@ export default function NewArrivals() {
             const isHovered = hoveredId === product.id
             const hasHoveredItem = hoveredId !== null
             const isNotHovered = hasHoveredItem && !isHovered
+            const hoveredIndex = hoveredId ? products.findIndex(p => p.id === hoveredId) : -1
+            
+            // Determine corner rounding based on position relative to hovered card
+            const getCornerRounding = () => {
+              if (!hasHoveredItem || isHovered) return "rounded-2xl"
+              
+              if (idx < hoveredIndex) {
+                // Cards to the left of hovered card - round right corners more
+                return "rounded-l-2xl rounded-r-3xl"
+              } else if (idx > hoveredIndex) {
+                // Cards to the right of hovered card - round left corners more
+                return "rounded-l-3xl rounded-r-2xl"
+              }
+              return "rounded-2xl"
+            }
             
             return (
               <Link href={`/products/${product.id}`} key={product.id}>
                 <div
-                  className={`relative rounded-2xl overflow-hidden transition-all duration-500 cursor-pointer group bg-black ${
+                  className={`relative ${getCornerRounding()} overflow-hidden transition-all duration-500 cursor-pointer group bg-black ${
                     isHovered 
                       ? "bg-primary scale-110 z-20 shadow-2xl" 
                       : isNotHovered 

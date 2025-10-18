@@ -92,6 +92,13 @@ export default function AdminDashboard() {
       href: "/admin/emails",
       color: "bg-red-50 text-red-600",
     },
+    {
+      title: "Seed Database",
+      count: "Setup",
+      icon: Package,
+      href: "/admin/seed-data",
+      color: "bg-indigo-50 text-indigo-600",
+    },
   ]
 
   return (

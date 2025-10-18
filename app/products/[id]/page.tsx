@@ -4,187 +4,37 @@ import { useState, useEffect } from "react"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { ChevronLeft, ChevronRight, Star } from "lucide-react"
-
-const allProducts = [
-  {
-    id: 1,
-    name: "ProBook Elite 15",
-    category: "laptops",
-    description: "High-performance laptop for professionals",
-    specs: ["Intel i7", "16GB RAM", "512GB SSD"],
-    image: "/professional-laptop.jpg",
-    images: ["/professional-laptop.jpg", "/laptop-keyboard.jpg", "/laptop-screen.jpg"],
-    fullDescription:
-      "Experience ultimate performance with the ProBook Elite 15. Engineered for professionals who demand speed and reliability. Features a stunning 15-inch display, all-day battery life, and premium build quality.",
-    rating: 4.8,
-    reviews: 324,
-    reviewsList: [
-      { author: "John Smith", rating: 5, text: "Excellent laptop! Fast, reliable, and beautiful design." },
-      { author: "Sarah Johnson", rating: 5, text: "Best investment for my work. Highly recommended!" },
-      { author: "Mike Chen", rating: 4, text: "Great performance, battery could be better." },
-    ],
-  },
-  {
-    id: 2,
-    name: "UltraBook Pro",
-    category: "laptops",
-    description: "Ultra-thin and powerful computing",
-    specs: ["Intel i9", "32GB RAM", "1TB SSD"],
-    image: "/ultrabook-thin-laptop.jpg",
-    images: ["/ultrabook-thin-laptop.jpg", "/laptop-side-view.jpg", "/laptop-front-view.jpg"],
-    fullDescription:
-      "The thinnest powerhouse ever created. UltraBook Pro combines portability with desktop-class performance. Perfect for professionals on the go.",
-    rating: 4.9,
-    reviews: 512,
-    reviewsList: [
-      { author: "Emma Wilson", rating: 5, text: "Incredibly thin yet powerful. Love it!" },
-      { author: "David Brown", rating: 5, text: "Worth every penny. Best ultrabook on the market." },
-      { author: "Lisa Anderson", rating: 5, text: "Exceeded my expectations in every way." },
-    ],
-  },
-  {
-    id: 3,
-    name: "WorkStation X1",
-    category: "desktops",
-    description: "Professional workstation for creative work",
-    specs: ["Xeon Processor", "64GB RAM", "2TB SSD"],
-    image: "/desktop-workstation.jpg",
-    images: ["/desktop-workstation.jpg", "/desktop-tower.jpg", "/desktop-setup.jpg"],
-    fullDescription:
-      "Built for creators. WorkStation X1 delivers the power needed for 4K video editing, 3D rendering, and more. Professional-grade components ensure reliability.",
-    rating: 4.7,
-    reviews: 287,
-    reviewsList: [
-      { author: "Alex Turner", rating: 5, text: "Perfect for video editing. No lag whatsoever." },
-      { author: "Nina Patel", rating: 4, text: "Great workstation, a bit pricey but worth it." },
-      { author: "Chris Lee", rating: 5, text: "Handles all my 3D projects smoothly." },
-    ],
-  },
-  {
-    id: 4,
-    name: "Desktop Pro Max",
-    category: "desktops",
-    description: "Powerful desktop for gaming and work",
-    specs: ["Intel i7", "32GB RAM", "1TB SSD"],
-    image: "/gaming-desktop.jpg",
-    images: ["/gaming-desktop.jpg", "/desktop-rgb-lighting.jpg", "/desktop-interior.jpg"],
-    fullDescription:
-      "Maximum performance for maximum productivity. Desktop Pro Max is ready for anything you throw at it. Gaming, streaming, or professional work.",
-    rating: 4.6,
-    reviews: 198,
-    reviewsList: [
-      { author: "Ryan Cooper", rating: 5, text: "Gaming beast! Runs everything at max settings." },
-      { author: "Jessica White", rating: 4, text: "Great all-rounder for work and gaming." },
-      { author: "Tom Harris", rating: 5, text: "Best desktop I've owned." },
-    ],
-  },
-  {
-    id: 5,
-    name: "Enterprise Router 5G",
-    category: "network",
-    description: "Next-gen 5G network router",
-    specs: ["5G Support", "WiFi 6E", "Gigabit Ports"],
-    image: "/placeholder.svg?height=384&width=512",
-    images: [
-      "/placeholder.svg?height=384&width=512",
-      "/placeholder.svg?height=384&width=512",
-      "/placeholder.svg?height=384&width=512",
-    ],
-    fullDescription:
-      "Connect to the future with 5G technology. Enterprise Router 5G ensures blazing-fast connectivity for your entire network.",
-    rating: 4.5,
-    reviews: 156,
-    reviewsList: [
-      { author: "Mark Davis", rating: 5, text: "5G speeds are incredible. Worth upgrading!" },
-      { author: "Susan Miller", rating: 4, text: "Great router, setup was easy." },
-      { author: "Kevin Moore", rating: 5, text: "Best network performance I've had." },
-    ],
-  },
-  {
-    id: 6,
-    name: "Network Switch Pro",
-    category: "network",
-    description: "Enterprise-grade network switch",
-    specs: ["48 Ports", "10Gbps", "PoE Support"],
-    image: "/placeholder.svg?height=384&width=512",
-    images: [
-      "/placeholder.svg?height=384&width=512",
-      "/placeholder.svg?height=384&width=512",
-      "/placeholder.svg?height=384&width=512",
-    ],
-    fullDescription:
-      "Enterprise-grade reliability meets cutting-edge performance. Network Switch Pro handles your most demanding workloads.",
-    rating: 4.4,
-    reviews: 142,
-    reviewsList: [
-      { author: "Patricia Garcia", rating: 5, text: "Reliable and fast. Perfect for our office." },
-      { author: "Robert Taylor", rating: 4, text: "Good switch, professional support is great." },
-      { author: "Linda Martinez", rating: 5, text: "No issues since installation." },
-    ],
-  },
-  {
-    id: 7,
-    name: "Studio Monitor Speakers",
-    category: "audio",
-    description: "Professional studio audio monitors",
-    specs: ["120W Power", "Frequency: 20Hz-20kHz", "XLR Input"],
-    image: "/placeholder.svg?height=384&width=512",
-    images: [
-      "/placeholder.svg?height=384&width=512",
-      "/placeholder.svg?height=384&width=512",
-      "/placeholder.svg?height=384&width=512",
-    ],
-    fullDescription:
-      "Studio-quality sound for professionals. Studio Monitor Speakers deliver accurate, detailed audio for critical listening.",
-    rating: 4.8,
-    reviews: 267,
-    reviewsList: [
-      { author: "James Wilson", rating: 5, text: "Crystal clear sound. Perfect for mixing." },
-      { author: "Michelle Clark", rating: 5, text: "Professional quality at a great price." },
-      { author: "Daniel Rodriguez", rating: 5, text: "Best monitors I've used." },
-    ],
-  },
-  {
-    id: 8,
-    name: "Wireless Headphones Pro",
-    category: "audio",
-    description: "Premium wireless audio experience",
-    specs: ["40hr Battery", "Active Noise Cancel", "Bluetooth 5.3"],
-    image: "/placeholder.svg?height=384&width=512",
-    images: [
-      "/placeholder.svg?height=384&width=512",
-      "/placeholder.svg?height=384&width=512",
-      "/placeholder.svg?height=384&width=512",
-    ],
-    fullDescription:
-      "Immerse yourself in sound. Wireless Headphones Pro combines premium audio with industry-leading noise cancellation.",
-    rating: 4.9,
-    reviews: 891,
-    reviewsList: [
-      { author: "Amanda Scott", rating: 5, text: "Best headphones ever! Noise cancellation is amazing." },
-      { author: "Brandon Lee", rating: 5, text: "Comfortable and sounds incredible." },
-      { author: "Chloe Green", rating: 5, text: "Worth every penny. Highly recommend!" },
-    ],
-  },
-]
+import { useProduct } from "@/hooks/use-products"
+import { useProducts } from "@/hooks/use-products"
 
 export default function ProductDetail({ params }: { params: { id: string } }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
   const [isVisible, setIsVisible] = useState(false)
   const [userRating, setUserRating] = useState(0)
   const [userComment, setUserComment] = useState("")
   const [showThankYouPopup, setShowThankYouPopup] = useState(false)
 
-  const product = allProducts.find((p) => p.id === Number.parseInt(params.id))
+  const { product, loading: productLoading, error: productError } = useProduct(params.id)
+  const { products } = useProducts()
 
   useEffect(() => {
-    setIsLoading(false)
     setIsVisible(true)
     window.scrollTo(0, 0)
   }, [])
 
-  if (!product) {
+  if (productLoading) {
+    return (
+      <main className="min-h-screen bg-background">
+        <Navigation />
+        <div className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        </div>
+        <Footer />
+      </main>
+    )
+  }
+
+  if (productError || !product) {
     return (
       <main className="min-h-screen bg-background">
         <Navigation />
@@ -196,7 +46,7 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
     )
   }
 
-  const relatedProducts = allProducts.filter((p) => p.category === product.category && p.id !== product.id)
+  const relatedProducts = products.filter((p) => p.category === product.category && p.id !== product.id)
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % product.images.length)

@@ -2,78 +2,45 @@
 
 import { useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-
-const reviews = [
-  {
-    id: 1,
-    name: "Yonas Mekonnen",
-    company: "Yonas Mobile",
-    text: "Working with ProKidTek has been a great experience. Their team is professional, responsive, and always willing to go the extra mile. The products they supplied for us were delivered on time, with excellent quality and functionality. We're proud to partner with them for our technology solutions.",
-    rating: 5,
-    logo: "bg-gradient-to-br from-purple-500 to-purple-700",
-  },
-  {
-    id: 2,
-    name: "John Smith",
-    company: "Tech Corp",
-    text: "ProKidTek provided exceptional service and quality products. Highly recommended!",
-    rating: 5,
-    logo: "bg-gradient-to-br from-blue-500 to-blue-700",
-  },
-  {
-    id: 3,
-    name: "Sarah Johnson",
-    company: "Digital Solutions",
-    text: "Great selection and competitive pricing. Our team loves the new equipment.",
-    rating: 5,
-    logo: "bg-gradient-to-br from-green-500 to-green-700",
-  },
-  {
-    id: 4,
-    name: "Mike Chen",
-    company: "Innovation Labs",
-    text: "Professional support and reliable products. Best tech supplier we have worked with.",
-    rating: 5,
-    logo: "bg-gradient-to-br from-orange-500 to-orange-700",
-  },
-  {
-    id: 5,
-    name: "Emily Rodriguez",
-    company: "Future Minds Academy",
-    text: "Outstanding customer service and fast shipping. The educational kits are perfect for our students.",
-    rating: 5,
-    logo: "bg-gradient-to-br from-pink-500 to-pink-700",
-  },
-  {
-    id: 6,
-    name: "David Park",
-    company: "StartUp Ventures",
-    text: "Excellent quality and competitive pricing. ProKidTek is our go-to supplier for all tech needs.",
-    rating: 5,
-    logo: "bg-gradient-to-br from-red-500 to-red-700",
-  },
-  {
-    id: 7,
-    name: "Lisa Thompson",
-    company: "Creative Studios",
-    text: "Fantastic products and responsive support team. They really understand our business needs.",
-    rating: 5,
-    logo: "bg-gradient-to-br from-cyan-500 to-cyan-700",
-  },
-]
+import { useTestimonials } from "@/hooks/use-testimonials"
 
 export default function ClientReviews() {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const { testimonials, loading, error } = useTestimonials()
 
   const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev === 0 ? reviews.length - 1 : prev - 1))
+    setCurrentIndex((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1))
   }
 
   const goToNext = () => {
-    setCurrentIndex((prev) => (prev === reviews.length - 1 ? 0 : prev + 1))
+    setCurrentIndex((prev) => (prev === testimonials.length - 1 ? 0 : prev + 1))
   }
 
-  const review = reviews[currentIndex]
+  if (loading) {
+    return (
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-3xl shadow-xl p-8 md:p-16 text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (error || testimonials.length === 0) {
+    return (
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-3xl shadow-xl p-8 md:p-16 text-center">
+            <p className="text-red-500">Error loading testimonials</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  const review = testimonials[currentIndex]
 
   return (
     <section className="py-20 px-4 bg-white">
@@ -92,12 +59,12 @@ export default function ClientReviews() {
             ))}
           </div>
 
-          <p className="text-lg md:text-xl text-foreground mb-12 leading-relaxed max-w-3xl mx-auto">"{review.text}"</p>
+          <p className="text-lg md:text-xl text-foreground mb-12 leading-relaxed max-w-3xl mx-auto">"{review.quote}"</p>
 
           <div className="flex flex-col items-center gap-4 mb-12">
             <div className={`w-24 h-24 rounded-full ${review.logo} shadow-lg`}></div>
             <div>
-              <p className="font-bold text-xl text-primary">{review.name}</p>
+              <p className="font-bold text-xl text-primary">{review.author}</p>
               <p className="text-foreground/70">{review.company}</p>
             </div>
           </div>
@@ -112,7 +79,7 @@ export default function ClientReviews() {
             </button>
 
             <div className="flex justify-center gap-2">
-              {reviews.map((_, index) => (
+              {testimonials.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentIndex(index)}

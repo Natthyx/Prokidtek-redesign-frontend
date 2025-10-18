@@ -2,139 +2,49 @@
 
 import Link from "next/link"
 import { useState, useEffect } from "react"
+import { useProducts } from "@/hooks/use-products"
 
 export default function ProductGrid() {
   const [activeCategory, setActiveCategory] = useState("all")
   const [isVisible, setIsVisible] = useState(false)
+  const { products, loading, error } = useProducts()
 
   useEffect(() => {
     setIsVisible(true)
   }, [])
 
-  const products = [
-    {
-      id: 1,
-      name: "ProBook Elite 15",
-      category: "laptops",
-      description: "High-performance laptop for professionals",
-      specs: ["Intel i7", "16GB RAM", "512GB SSD"],
-      image: "/professional-laptop-computer.jpg",
-      images: ["/professional-laptop-front-view.jpg", "/laptop-keyboard-and-screen.jpg", "/laptop-side-view.jpg"],
-      fullDescription:
-        "Experience ultimate performance with the ProBook Elite 15. Engineered for professionals who demand speed and reliability.",
-      rating: 4.8,
-      reviews: 324,
-    },
-    {
-      id: 2,
-      name: "UltraBook Pro",
-      category: "laptops",
-      description: "Ultra-thin and powerful computing",
-      specs: ["Intel i9", "32GB RAM", "1TB SSD"],
-      image: "/ultrabook-thin-laptop.jpg",
-      images: ["/ultrabook-laptop-thin-design.jpg", "/ultrabook-keyboard.jpg", "/ultrabook-side-profile.jpg"],
-      fullDescription:
-        "The thinnest powerhouse ever created. UltraBook Pro combines portability with desktop-class performance.",
-      rating: 4.9,
-      reviews: 512,
-    },
-    {
-      id: 3,
-      name: "WorkStation X1",
-      category: "desktops",
-      description: "Professional workstation for creative work",
-      specs: ["Xeon Processor", "64GB RAM", "2TB SSD"],
-      image: "/professional-desktop-workstation.jpg",
-      images: ["/desktop-workstation-tower.jpg", "/workstation-with-monitor.jpg", "/desktop-computer-setup.jpg"],
-      fullDescription:
-        "Built for creators. WorkStation X1 delivers the power needed for 4K video editing, 3D rendering, and more.",
-      rating: 4.7,
-      reviews: 287,
-    },
-    {
-      id: 4,
-      name: "Desktop Pro Max",
-      category: "desktops",
-      description: "Powerful desktop for gaming and work",
-      specs: ["Intel i7", "32GB RAM", "1TB SSD"],
-      image: "/gaming-desktop-computer.jpg",
-      images: ["/gaming-desktop-tower.jpg", "/desktop-gaming-setup.jpg", "/desktop-computer-front.jpg"],
-      fullDescription:
-        "Maximum performance for maximum productivity. Desktop Pro Max is ready for anything you throw at it.",
-      rating: 4.6,
-      reviews: 198,
-    },
-    {
-      id: 5,
-      name: "Enterprise Router 5G",
-      category: "network",
-      description: "Next-gen 5G network router",
-      specs: ["5G Support", "WiFi 6E", "Gigabit Ports"],
-      image: "/5g-network-router.jpg",
-      images: [
-        "/5g-router-device.jpg",
-        "/placeholder.svg?height=400&width=400",
-        "/placeholder.svg?height=400&width=400",
-      ],
-      fullDescription:
-        "Connect to the future with 5G technology. Enterprise Router 5G ensures blazing-fast connectivity for your entire network.",
-      rating: 4.5,
-      reviews: 156,
-    },
-    {
-      id: 6,
-      name: "Network Switch Pro",
-      category: "network",
-      description: "Enterprise-grade network switch",
-      specs: ["48 Ports", "10Gbps", "PoE Support"],
-      image: "/placeholder.svg?height=300&width=300",
-      images: [
-        "/placeholder.svg?height=400&width=400",
-        "/placeholder.svg?height=400&width=400",
-        "/placeholder.svg?height=400&width=400",
-      ],
-      fullDescription:
-        "Enterprise-grade reliability meets cutting-edge performance. Network Switch Pro handles your most demanding workloads.",
-      rating: 4.4,
-      reviews: 142,
-    },
-    {
-      id: 7,
-      name: "Studio Monitor Speakers",
-      category: "audio",
-      description: "Professional studio audio monitors",
-      specs: ["120W Power", "Frequency: 20Hz-20kHz", "XLR Input"],
-      image: "/placeholder.svg?height=300&width=300",
-      images: [
-        "/placeholder.svg?height=400&width=400",
-        "/placeholder.svg?height=400&width=400",
-        "/placeholder.svg?height=400&width=400",
-      ],
-      fullDescription:
-        "Studio-quality sound for professionals. Studio Monitor Speakers deliver accurate, detailed audio for critical listening.",
-      rating: 4.8,
-      reviews: 267,
-    },
-    {
-      id: 8,
-      name: "Wireless Headphones Pro",
-      category: "audio",
-      description: "Premium wireless audio experience",
-      specs: ["40hr Battery", "Active Noise Cancel", "Bluetooth 5.3"],
-      image: "/placeholder.svg?height=300&width=300",
-      images: [
-        "/placeholder.svg?height=400&width=400",
-        "/placeholder.svg?height=400&width=400",
-        "/placeholder.svg?height=400&width=400",
-      ],
-      fullDescription:
-        "Immerse yourself in sound. Wireless Headphones Pro combines premium audio with industry-leading noise cancellation.",
-      rating: 4.9,
-      reviews: 891,
-    },
-  ]
-
   const filteredProducts = activeCategory === "all" ? products : products.filter((p) => p.category === activeCategory)
+
+  if (loading) {
+    return (
+      <section className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[...Array(8)].map((_, idx) => (
+              <div key={idx} className="bg-card rounded-3xl overflow-hidden border-2 border-border animate-pulse">
+                <div className="h-40 bg-muted"></div>
+                <div className="p-6 space-y-4">
+                  <div className="h-4 bg-muted rounded"></div>
+                  <div className="h-6 bg-muted rounded"></div>
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section className="py-20 px-4">
+        <div className="max-w-6xl mx-auto text-center">
+          <p className="text-red-500">Error loading products: {error}</p>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="py-20 px-4">

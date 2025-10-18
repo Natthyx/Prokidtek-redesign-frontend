@@ -10,40 +10,36 @@ const products = [
     name: "HP 640 G3",
     image: "/laptop-front-view.jpg",
     category: "Laptops",
-    isFeatured: false,
   },
   {
     id: 2,
     name: "LENOVO T450",
     image: "/laptop-keyboard-and-screen.jpg",
     category: "Laptops",
-    isFeatured: false,
   },
   {
     id: 3,
     name: "LENOVO T470S",
     image: "/laptop-side-view.jpg",
     category: "Laptops",
-    isFeatured: true,
   },
   {
     id: 4,
     name: "HP 850 G5",
     image: "/professional-laptop.jpg",
     category: "Laptops",
-    isFeatured: false,
   },
   {
     id: 5,
     name: "D-Link Router",
     image: "/network-device.jpg",
     category: "Network",
-    isFeatured: false,
   },
 ]
 
 export default function NewArrivals() {
   const [likedProducts, setLikedProducts] = useState<number[]>([])
+  const [hoveredId, setHoveredId] = useState<number | null>(null)
 
   const toggleLike = (productId: number, e: React.MouseEvent) => {
     e.preventDefault()
@@ -62,15 +58,24 @@ export default function NewArrivals() {
         <p className="text-center text-muted-foreground mb-16 animate-fade-in">Discover our latest tech products</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          {products.map((product, idx) => (
-            <Link href={`/products/${product.id}`} key={product.id}>
-              <div
-                className={`relative rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-2xl animate-fade-in-up stagger-item-${idx + 1} cursor-pointer group ${
-                  product.isFeatured 
-                    ? "bg-gradient-to-br from-orange-500 to-amber-600" 
-                    : "bg-black"
-                }`}
-              >
+          {products.map((product, idx) => {
+            const isHovered = hoveredId === product.id
+            const hasHoveredItem = hoveredId !== null
+            const isNotHovered = hasHoveredItem && !isHovered
+            
+            return (
+              <Link href={`/products/${product.id}`} key={product.id}>
+                <div
+                  className={`relative rounded-2xl overflow-hidden transition-all duration-500 cursor-pointer group bg-black ${
+                    isHovered 
+                      ? "bg-primary scale-110 z-20 shadow-2xl" 
+                      : isNotHovered 
+                        ? "scale-95 opacity-60" 
+                        : "hover:shadow-2xl"
+                  } animate-fade-in-up stagger-item-${idx + 1}`}
+                  onMouseEnter={() => setHoveredId(product.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                >
                 {/* Product Image Container */}
                 <div className="relative h-48 bg-muted overflow-hidden">
                   <img
@@ -107,7 +112,8 @@ export default function NewArrivals() {
                 </div>
               </div>
             </Link>
-          ))}
+            )
+          })}
         </div>
       </div>
     </section>

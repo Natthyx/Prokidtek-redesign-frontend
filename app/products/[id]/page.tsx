@@ -1,20 +1,21 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { useProduct } from "@/hooks/use-products"
 import { useProducts } from "@/hooks/use-products"
 
-export default function ProductDetail({ params }: { params: { id: string } }) {
+export default function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
   const [userRating, setUserRating] = useState(0)
   const [userComment, setUserComment] = useState("")
   const [showThankYouPopup, setShowThankYouPopup] = useState(false)
 
-  const { product, loading: productLoading, error: productError } = useProduct(params.id)
+  const resolvedParams = use(params)
+  const { product, loading: productLoading, error: productError } = useProduct(resolvedParams.id)
   const { products } = useProducts()
 
   useEffect(() => {

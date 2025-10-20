@@ -43,18 +43,18 @@ export default function ClientBenefits() {
   ]
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-b from-background to-muted/30">
+    <section className="py-20 px-4 bg-gray-800">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">Why Choose ProKidTek</h2>
-          <p className="text-xl text-foreground/70">Exceptional benefits for our valued clients</p>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">Why Choose ProKidTek</h2>
+          <p className="text-xl text-white/80">Exceptional benefits for our valued clients</p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {benefits.map((benefit, idx) => (
             <div
               key={idx}
-              className={`bg-card rounded-2xl p-8 border-2 border-border hover:shadow-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 ${
+              className={`bg-white/10 rounded-2xl p-8 border-2 border-white/20 hover:shadow-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 backdrop-blur-sm ${
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
               style={{
@@ -62,8 +62,8 @@ export default function ClientBenefits() {
               }}
             >
               <div className="text-5xl mb-4">{benefit.icon}</div>
-              <h3 className="text-xl font-bold text-foreground mb-3">{benefit.title}</h3>
-              <p className="text-foreground/70">{benefit.description}</p>
+              <h3 className="text-xl font-bold text-white mb-3">{benefit.title}</h3>
+              <p className="text-white/80">{benefit.description}</p>
             </div>
           ))}
         </div>

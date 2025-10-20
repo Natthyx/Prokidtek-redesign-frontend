@@ -4,76 +4,28 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Plus, Edit2, Trash2, X } from "lucide-react"
-import FileUpload from "@/components/ui/file-upload"
-
-interface Product {
-  id: string
-  name: string
-  category: string
-  stock: number
-  status: string
-  description: string
-  specs: string
-  image: string
-}
+import MultipleFileUpload from "@/components/ui/multiple-file-upload-real"
+import { Product } from "@/lib/types"
+import { getProducts, addProduct, updateProduct, deleteProduct } from "@/lib/firebase-services"
 
 export default function ProductsAdmin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [formData, setFormData] = useState({ name: "", category: "", stock: "", description: "", specs: "", image: "" })
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: "1",
-      name: "MacBook Pro 16",
-      category: "Laptops",
-      stock: 45,
-      status: "Active",
-      description: "High-performance laptop for professionals",
-      specs: "Intel i7, 16GB RAM, 512GB SSD",
-      image: "/product-image.jpg",
-    },
-    {
-      id: "2",
-      name: "Dell XPS 13",
-      category: "Laptops",
-      stock: 32,
-      status: "Active",
-      description: "Ultra-portable powerhouse",
-      specs: "Intel i5, 8GB RAM, 256GB SSD",
-      image: "/product-image.jpg",
-    },
-    {
-      id: "3",
-      name: "HP Pavilion Desktop",
-      category: "Desktops",
-      stock: 18,
-      status: "Active",
-      description: "Reliable desktop for everyday use",
-      specs: "Intel i5, 16GB RAM, 1TB HDD",
-      image: "/product-image.jpg",
-    },
-    {
-      id: "4",
-      name: "Cisco Switch",
-      category: "Network Devices",
-      stock: 12,
-      status: "Low Stock",
-      description: "Enterprise-grade network switch",
-      specs: "24 Ports, Gigabit, PoE",
-      image: "/product-image.jpg",
-    },
-    {
-      id: "5",
-      name: "Sony WH-1000XM5",
-      category: "Audio Equipment",
-      stock: 67,
-      status: "Active",
-      description: "Premium noise-canceling headphones",
-      specs: "40hr Battery, ANC, Bluetooth 5.3",
-      image: "/product-image.jpg",
-    },
-  ])
+  const [loading, setLoading] = useState(true)
+  const [formData, setFormData] = useState({ 
+    name: "", 
+    category: "", 
+    stock: "", 
+    description: "", 
+    fullDescription: "",
+    specs: "", 
+    images: [] as string[],
+    price: "",
+    rating: "5",
+    reviews: "0"
+  })
+  const [products, setProducts] = useState<Product[]>([])
   const router = useRouter()
 
   const categories = ["Laptops", "Desktops", "Network Devices", "Audio Equipment", "Accessories"]
@@ -84,11 +36,34 @@ export default function ProductsAdmin() {
       router.push("/admin/login")
     } else {
       setIsAuthenticated(true)
+      fetchProducts()
     }
   }, [router])
 
-  const handleDelete = (id: string) => {
-    setProducts(products.filter((item) => item.id !== id))
+  const fetchProducts = async () => {
+    try {
+      setLoading(true)
+      const data = await getProducts()
+      setProducts(data)
+    } catch (error) {
+      console.error('Error fetching products:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      const success = await deleteProduct(id)
+      if (success) {
+        setProducts(products.filter((item) => item.id !== id))
+      } else {
+        alert('Failed to delete product')
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error)
+      alert('Failed to delete product')
+    }
   }
 
   const handleEdit = (product: Product) => {
@@ -98,64 +73,115 @@ export default function ProductsAdmin() {
       category: product.category,
       stock: product.stock.toString(),
       description: product.description,
-      specs: product.specs,
-      image: product.image,
+      fullDescription: product.fullDescription || "",
+      specs: product.specs.join(", "),
+      images: product.images || [product.image || ""],
+      price: product.price?.toString() || "",
+      rating: product.rating.toString(),
+      reviews: product.reviews.toString()
     })
     setShowModal(true)
   }
 
-  const handleAddProduct = () => {
+  const handleAddProduct = async () => {
     if (
       formData.name &&
       formData.category &&
       formData.stock &&
       formData.description &&
       formData.specs &&
-      formData.image
+      formData.images.length > 0
     ) {
-      if (editingId) {
-        setProducts(
-          products.map((item) =>
-            item.id === editingId
-              ? {
-                  ...item,
-                  name: formData.name,
-                  category: formData.category,
-                  stock: Number.parseInt(formData.stock),
-                  status: Number.parseInt(formData.stock) > 20 ? "Active" : "Low Stock",
-                  description: formData.description,
-                  specs: formData.specs,
-                  image: formData.image,
-                }
-              : item,
-          ),
-        )
-        setEditingId(null)
-      } else {
-        const newProduct: Product = {
-          id: Date.now().toString(),
+      try {
+        const stockNumber = Number.parseInt(formData.stock)
+        const status = stockNumber > 20 ? "Active" : stockNumber > 0 ? "Low Stock" : "Out of Stock"
+        
+        const productData: any = {
           name: formData.name,
           category: formData.category,
-          stock: Number.parseInt(formData.stock),
-          status: Number.parseInt(formData.stock) > 20 ? "Active" : "Low Stock",
+          stock: stockNumber,
+          status: status as 'Active' | 'Low Stock' | 'Out of Stock',
           description: formData.description,
-          specs: formData.specs,
-          image: formData.image,
+          fullDescription: formData.fullDescription || formData.description,
+          specs: formData.specs.split(',').map(spec => spec.trim()).filter(spec => spec),
+          image: formData.images[0], // First image as main image
+          images: formData.images,
+          rating: Number.parseFloat(formData.rating),
+          reviews: Number.parseInt(formData.reviews),
+          featured: false
         }
-        setProducts([newProduct, ...products])
+
+        // Only add price if it's provided and not empty
+        if (formData.price && formData.price.trim() !== '') {
+          productData.price = Number.parseFloat(formData.price)
+        }
+
+        if (editingId) {
+          const success = await updateProduct(editingId, productData)
+          if (success) {
+            await fetchProducts() // Refresh the products list
+            setEditingId(null)
+          } else {
+            alert('Failed to update product')
+          }
+        } else {
+          const productId = await addProduct(productData)
+          if (productId) {
+            await fetchProducts() // Refresh the products list
+          } else {
+            alert('Failed to add product')
+          }
+        }
+        
+        setFormData({ 
+          name: "", 
+          category: "", 
+          stock: "", 
+          description: "", 
+          fullDescription: "",
+          specs: "", 
+          images: [],
+          price: "",
+          rating: "5",
+          reviews: "0"
+        })
+        setShowModal(false)
+      } catch (error) {
+        console.error('Error saving product:', error)
+        alert('Failed to save product')
       }
-      setFormData({ name: "", category: "", stock: "", description: "", specs: "", image: "" })
-      setShowModal(false)
     }
   }
 
   const handleCloseModal = () => {
     setShowModal(false)
     setEditingId(null)
-    setFormData({ name: "", category: "", stock: "", description: "", specs: "", image: "" })
+    setFormData({ 
+      name: "", 
+      category: "", 
+      stock: "", 
+      description: "", 
+      fullDescription: "",
+      specs: "", 
+      images: [],
+      price: "",
+      rating: "5",
+      reviews: "0"
+    })
   }
 
   if (!isAuthenticated) return null
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-muted flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading products...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-muted">
@@ -171,7 +197,18 @@ export default function ProductsAdmin() {
           <button
             onClick={() => {
               setEditingId(null)
-              setFormData({ name: "", category: "", stock: "", description: "", specs: "", image: "" })
+              setFormData({ 
+                name: "", 
+                category: "", 
+                stock: "", 
+                description: "", 
+                fullDescription: "",
+                specs: "", 
+                images: [],
+                price: "",
+                rating: "5",
+                reviews: "0"
+              })
               setShowModal(true)
             }}
             className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-300 font-medium hover:scale-105"
@@ -293,23 +330,81 @@ export default function ProductsAdmin() {
               </div>
 
               <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Full Description</label>
+                <textarea
+                  value={formData.fullDescription}
+                  onChange={(e) => setFormData({ ...formData, fullDescription: e.target.value })}
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                  placeholder="Enter detailed product description"
+                  rows={4}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Price</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Enter price (optional)"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Rating</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="5"
+                    step="0.1"
+                    value={formData.rating}
+                    onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
+                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="5.0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Reviews Count</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.reviews}
+                    onChange={(e) => setFormData({ ...formData, reviews: e.target.value })}
+                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+
+              <div>
                 <label className="block text-sm font-medium text-foreground mb-2">Specifications</label>
                 <textarea
                   value={formData.specs}
                   onChange={(e) => setFormData({ ...formData, specs: e.target.value })}
                   className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                  placeholder="Enter specifications (e.g., Intel i7, 16GB RAM, 512GB SSD)"
+                  placeholder="Enter specifications separated by commas (e.g., Intel i7, 16GB RAM, 512GB SSD)"
                   rows={3}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Product Image</label>
-                <FileUpload
-                  value={formData.image}
-                  onChange={(value) => setFormData({ ...formData, image: value })}
-                  placeholder="Choose a product image"
+                <label className="block text-sm font-medium text-foreground mb-2">Product Images</label>
+                <MultipleFileUpload
+                  value={formData.images}
+                  onChange={(images) => setFormData({ ...formData, images })}
+                  placeholder="Choose your actual product photos"
+                  maxFiles={3}
                 />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Upload your actual product photos to create a slideshow. The first photo will be used as the main product image.
+                  <br />
+                  <span className="text-green-600 font-medium">
+                    Your real photos are compressed to fit within Firebase limits while maintaining quality.
+                  </span>
+                </p>
               </div>
 
               <div className="flex gap-3 pt-4">

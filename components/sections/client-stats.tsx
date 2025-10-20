@@ -39,7 +39,7 @@ export default function ClientStats() {
   ]
 
   return (
-    <section className="py-16 px-4 bg-muted/30">
+    <section className="py-16 px-4 bg-gray-800">
       <div className="max-w-6xl mx-auto">
         <div className="grid md:grid-cols-4 gap-8">
           {stats.map((stat, index) => (
@@ -48,7 +48,7 @@ export default function ClientStats() {
                 <CountUpNumber target={stat.target} />
                 {stat.number.includes("+") ? "+" : "%"}
               </div>
-              <p className="text-lg text-foreground/70">{stat.label}</p>
+              <p className="text-lg text-white/80">{stat.label}</p>
             </div>
           ))}
         </div>

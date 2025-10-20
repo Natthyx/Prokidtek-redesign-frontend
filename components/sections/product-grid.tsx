@@ -62,8 +62,8 @@ export default function ProductGrid() {
                 transitionDelay: `${idx * 100}ms`,
               }}
             >
-              <div className="bg-card rounded-2xl overflow-hidden border-2 border-border hover:shadow-2xl transition-all duration-500 transform hover:scale-105 h-full flex flex-col">
-                <div className="h-28 bg-muted relative overflow-hidden group-hover:scale-110 transition-transform duration-500">
+              <div className="bg-card rounded-2xl overflow-hidden border-2 border-border hover:shadow-2xl transition-all duration-500 transform hover:scale-105 h-full flex flex-col hover:shadow-orange-500/25 hover:border-orange-500/50">
+                <div className="h-40 bg-muted relative overflow-hidden group-hover:scale-110 transition-transform duration-500">
                   <img
                     src={product.image || "/placeholder.svg"}
                     alt={product.name}
@@ -77,16 +77,18 @@ export default function ProductGrid() {
                   </h3>
                   <p className="text-foreground/70 text-xs mb-3 line-clamp-2">{product.description}</p>
                   <div className="space-y-1 mb-4 flex-grow">
-                    {product.specs.slice(0, 2).map((spec, idx) => (
-                      <p key={idx} className="text-xs text-foreground/60">
-                        • {spec}
-                      </p>
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs font-semibold text-foreground">{product.rating}</span>
-                      <span className="text-xs text-foreground/60">({product.reviews})</span>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        {product.specs.slice(0, 2).map((spec, idx) => (
+                          <p key={idx} className="text-xs text-foreground/60">
+                            • {spec}
+                          </p>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-1 ml-2">
+                        <span className="text-xs font-semibold text-foreground">{product.rating}</span>
+                        <span className="text-xs text-foreground/60">({product.reviews})</span>
+                      </div>
                     </div>
                   </div>
                   <button className="w-full bg-primary text-primary-foreground px-3 py-2 rounded-full hover:bg-accent transition-all duration-300 font-bold text-sm transform hover:scale-105 group-hover:shadow-lg">

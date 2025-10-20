@@ -60,11 +60,11 @@ export default function ProductsWeOffer() {
   }, [])
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-b from-muted/30 to-background">
+    <section className="py-20 px-4 bg-gray-800">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Diverse Product Range</h2>
-          <p className="text-xl text-foreground/70">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Diverse Product Range</h2>
+          <p className="text-xl text-white/80">
             We offer a comprehensive selection of premium technology products across multiple categories
           </p>
         </div>
@@ -75,13 +75,13 @@ export default function ProductsWeOffer() {
             return (
               <div
                 key={index}
-                className={`group relative overflow-hidden rounded-2xl bg-white p-8 border border-primary/10 transition-all duration-500 transform ${
+                className={`group relative overflow-hidden rounded-2xl bg-white/10 p-8 border border-white/20 transition-all duration-500 transform ${
                   visibleItems[index] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-                } hover:shadow-2xl hover:border-primary/50 hover:scale-105 cursor-pointer`}
+                } hover:shadow-2xl hover:border-primary/50 hover:scale-105 cursor-pointer backdrop-blur-sm`}
               >
                 {/* Background gradient on hover */}
                 <div
-                  className={`absolute inset-0 bg-gradient-to-br ${product.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+                  className={`absolute inset-0 bg-gradient-to-br ${product.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300`}
                 ></div>
 
                 {/* Content */}
@@ -91,8 +91,8 @@ export default function ProductsWeOffer() {
                   >
                     <Icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-foreground mb-2">{product.name}</h3>
-                  <p className="text-foreground/70 text-sm leading-relaxed">{product.description}</p>
+                  <h3 className="text-xl font-bold text-white mb-2">{product.name}</h3>
+                  <p className="text-white/80 text-sm leading-relaxed">{product.description}</p>
 
                   {/* Animated line */}
                   <div className="mt-4 h-1 w-0 bg-gradient-to-r from-primary to-accent group-hover:w-full transition-all duration-300 rounded-full"></div>

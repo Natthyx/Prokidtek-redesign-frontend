@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore'
 import { db } from './firebase'
 import { Product, NewArrival, BestSelling, Testimonial, Review, ContactEmail } from './types'
+import { deleteMultipleImages } from './image-storage'
 
 // Products Collection
 export const productsCollection = collection(db, 'products')
@@ -89,8 +90,36 @@ export const updateProduct = async (id: string, product: Partial<Product>): Prom
 
 export const deleteProduct = async (id: string): Promise<boolean> => {
   try {
+    // First get the product to extract image paths
+    const product = await getProduct(id)
+    
     const docRef = doc(productsCollection, id)
     await deleteDoc(docRef)
+    
+    // Delete associated images from Firebase Storage
+    if (product && product.images && product.images.length > 0) {
+      try {
+        // Extract storage paths from URLs (this is a simplified approach)
+        // In a production app, you might want to store the storage paths separately
+        const imagePaths = product.images.map(url => {
+          // Extract path from Firebase Storage URL
+          const urlParts = url.split('/')
+          const pathIndex = urlParts.findIndex(part => part === 'o') + 1
+          if (pathIndex > 0 && pathIndex < urlParts.length) {
+            return decodeURIComponent(urlParts[pathIndex].split('?')[0])
+          }
+          return null
+        }).filter(Boolean) as string[]
+        
+        if (imagePaths.length > 0) {
+          await deleteMultipleImages(imagePaths)
+        }
+      } catch (storageError) {
+        console.error('Error deleting images from storage:', storageError)
+        // Don't fail the product deletion if image deletion fails
+      }
+    }
+    
     return true
   } catch (error) {
     console.error('Error deleting product:', error)

@@ -66,16 +66,16 @@ export default function NewArrivals() {
             
             // Determine corner rounding based on position relative to hovered card
             const getCornerRounding = () => {
-              if (!hasHoveredItem || isHovered) return "rounded-2xl"
-              
+              if (!hasHoveredItem || isHovered) return "rounded-3xl"
+
               if (idx < hoveredIndex) {
-                // Cards to the left of hovered card - round right corners more
-                return "rounded-l-2xl rounded-r-3xl"
+                // Left of hovered: straighten left side, exaggerate right rounding
+                return "rounded-l-none rounded-r-[2.5rem]"
               } else if (idx > hoveredIndex) {
-                // Cards to the right of hovered card - round left corners more
-                return "rounded-l-3xl rounded-r-2xl"
+                // Right of hovered: exaggerate left rounding, straighten right side
+                return "rounded-l-[2.5rem] rounded-r-none"
               }
-              return "rounded-2xl"
+              return "rounded-3xl"
             }
             
             return (

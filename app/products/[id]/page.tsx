@@ -18,10 +18,30 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
   const { product, loading: productLoading, error: productError } = useProduct(resolvedParams.id)
   const { products } = useProducts()
 
+  // Initialize images and specs early to avoid reference errors
+  const images = product?.images || [product?.image || "/placeholder.svg"]
+  const specs = product?.specs || []
+
   useEffect(() => {
     setIsVisible(true)
     window.scrollTo(0, 0)
   }, [])
+
+  // Keyboard navigation for image slideshow
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (images.length > 1) {
+        if (e.key === 'ArrowLeft') {
+          prevImage()
+        } else if (e.key === 'ArrowRight') {
+          nextImage()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [images.length])
 
   if (productLoading) {
     return (
@@ -48,9 +68,6 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
   }
 
   const relatedProducts = products.filter((p) => p.category === product.category && p.id !== product.id)
-
-  const images = product.images || [product.image || "/placeholder.svg"]
-  const specs = product.specs || []
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length)
@@ -91,41 +108,46 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                 {/* Image Navigation - Only show if more than 1 image */}
                 {images.length > 1 && (
                   <>
-                <button
-                  onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110"
-                >
-                  <ChevronLeft className="w-6 h-6 text-black" />
-                </button>
-                <button
-                  onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110"
-                >
-                  <ChevronRight className="w-6 h-6 text-black" />
-                </button>
+                    <button
+                      onClick={prevImage}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110"
+                    >
+                      <ChevronLeft className="w-6 h-6 text-black" />
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110"
+                    >
+                      <ChevronRight className="w-6 h-6 text-black" />
+                    </button>
+                    
+                    {/* Image counter */}
+                    <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                      {currentImageIndex + 1} / {images.length}
+                    </div>
                   </>
                 )}
               </div>
 
               {/* Thumbnail Gallery - Only show if more than 1 image */}
               {images.length > 1 && (
-              <div className="flex gap-4">
+                <div className="flex gap-3 overflow-x-auto pb-2">
                   {images.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrentImageIndex(idx)}
-                    className={`w-20 h-20 rounded-2xl transition-all duration-300 transform hover:scale-110 overflow-hidden ${
-                      idx === currentImageIndex ? "ring-2 ring-primary scale-110" : "opacity-60 hover:opacity-100"
-                    }`}
-                  >
-                    <img
-                      src={img || "/placeholder.svg"}
-                      alt={`${product.name} ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentImageIndex(idx)}
+                      className={`flex-shrink-0 w-16 h-16 rounded-xl transition-all duration-300 transform hover:scale-110 overflow-hidden ${
+                        idx === currentImageIndex ? "ring-2 ring-primary scale-110" : "opacity-60 hover:opacity-100"
+                      }`}
+                    >
+                      <img
+                        src={img || "/placeholder.svg"}
+                        alt={`${product.name} ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
 

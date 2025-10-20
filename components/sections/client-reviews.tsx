@@ -44,13 +44,13 @@ export default function ClientReviews() {
 
   return (
     <section className="py-20 px-4 bg-white">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
           Why customers <span className="text-primary">love</span>
         </h2>
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">working with us</h2>
 
-        <div className="bg-white rounded-3xl shadow-xl p-8 md:p-16 text-center">
+        <div className="bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.35)] border border-border p-8 md:p-16 text-center">
           <div className="flex gap-1 mb-8 justify-center">
             {[...Array(review.rating)].map((_, i) => (
               <span key={i} className="text-primary text-3xl">
@@ -62,7 +62,11 @@ export default function ClientReviews() {
           <p className="text-lg md:text-xl text-foreground mb-12 leading-relaxed max-w-3xl mx-auto">"{review.quote}"</p>
 
           <div className="flex flex-col items-center gap-4 mb-12">
-            <div className={`w-24 h-24 rounded-full ${review.logo} shadow-lg`}></div>
+            <img
+              src={review.photo || "/placeholder-user.jpg"}
+              alt={review.author}
+              className="w-28 h-28 rounded-full object-cover shadow-xl border-2 border-primary"
+            />
             <div>
               <p className="font-bold text-xl text-primary">{review.author}</p>
               <p className="text-foreground/70">{review.company}</p>

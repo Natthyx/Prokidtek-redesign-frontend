@@ -19,10 +19,10 @@ export default function Home() {
       <NewArrivals />
       <FeaturedBrands />
       <BestSelling />
-      <BulkDiscount />
-      <ClientReviews />
-      <GenuineProducts />
       <StatsSection />
+      <BulkDiscount />
+      <GenuineProducts />
+      <ClientReviews />
       <OutplayCompetition />
       <VideoSection />
       <Footer />

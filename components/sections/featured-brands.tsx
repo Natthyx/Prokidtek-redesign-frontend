@@ -15,9 +15,9 @@ const brands = [
 
 export default function FeaturedBrands() {
   return (
-    <section className="py-20 px-4 bg-secondary/5">
+    <section className="py-20 px-4 bg-gray-800">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-5xl font-bold text-center mb-16 text-secondary animate-fade-in-down">Featured Brands</h2>
+        <h2 className="text-5xl font-bold text-center mb-16 text-white animate-fade-in-down">Featured Brands</h2>
 
         <div className="relative overflow-hidden">
           <div
@@ -30,7 +30,7 @@ export default function FeaturedBrands() {
             {[...brands, ...brands].map((brand, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-48 h-40 bg-white rounded-3xl flex items-center justify-center transition-all duration-500 cursor-pointer border-2 border-border hover:shadow-2xl transform hover:scale-110 hover:border-primary group shadow-lg"
+                className="flex-shrink-0 w-48 h-40 bg-white/10 rounded-3xl flex items-center justify-center transition-all duration-500 cursor-pointer border-2 border-white/20 hover:shadow-2xl transform hover:scale-110 hover:border-primary group shadow-xl backdrop-blur-sm"
               >
                 <div className="text-center">
                   <div className="w-20 h-20 mb-3 flex items-center justify-center">
@@ -42,7 +42,7 @@ export default function FeaturedBrands() {
                       className="w-full h-full object-contain"
                     />
                   </div>
-                  <p className="font-bold text-secondary text-sm group-hover:text-primary transition-colors duration-300">
+                  <p className="font-bold text-white text-sm group-hover:text-primary transition-colors duration-300">
                     {brand.name}
                   </p>
                 </div>

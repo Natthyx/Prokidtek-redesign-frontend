@@ -24,6 +24,30 @@ export default function AboutTeam() {
       bio: "Passionate about delivering exceptional service",
       image: "/professional-woman-service.jpg",
     },
+    {
+      name: "David Wilson",
+      role: "Lead Developer",
+      bio: "Full-stack developer with expertise in modern technologies",
+      image: "/professional-man-ceo.jpg",
+    },
+    {
+      name: "Lisa Park",
+      role: "Marketing Director",
+      bio: "Creative strategist focused on brand growth and engagement",
+      image: "/professional-woman-tech.jpg",
+    },
+    {
+      name: "Robert Taylor",
+      role: "Operations Manager",
+      bio: "Ensures smooth operations and efficient processes",
+      image: "/professional-man-sales.jpg",
+    },
+    {
+      name: "Maria Garcia",
+      role: "HR Director",
+      bio: "Building and nurturing our talented team culture",
+      image: "/professional-woman-service.jpg",
+    },
   ]
 
   return (
@@ -37,7 +61,7 @@ export default function AboutTeam() {
           {teamMembers.map((member) => (
             <div
               key={member.name}
-              className="bg-card rounded-lg overflow-hidden border border-border hover:shadow-lg transition-shadow shadow-md"
+              className="bg-card rounded-lg overflow-hidden border border-border hover:shadow-lg transition-all duration-300 shadow-md hover:shadow-orange-500/25 hover:border-orange-500/50 hover:scale-105"
             >
               <div className="h-48 bg-gradient-to-br from-primary to-accent overflow-hidden">
                 <img

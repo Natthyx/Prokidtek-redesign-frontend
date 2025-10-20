@@ -16,7 +16,6 @@ export default function ProductsAdmin() {
   const [formData, setFormData] = useState({ 
     name: "", 
     category: "", 
-    stock: "", 
     description: "", 
     fullDescription: "",
     specs: "", 
@@ -71,7 +70,6 @@ export default function ProductsAdmin() {
     setFormData({
       name: product.name,
       category: product.category,
-      stock: product.stock.toString(),
       description: product.description,
       fullDescription: product.fullDescription || "",
       specs: product.specs.join(", "),
@@ -87,20 +85,14 @@ export default function ProductsAdmin() {
     if (
       formData.name &&
       formData.category &&
-      formData.stock &&
       formData.description &&
       formData.specs &&
       formData.images.length > 0
     ) {
       try {
-        const stockNumber = Number.parseInt(formData.stock)
-        const status = stockNumber > 20 ? "Active" : stockNumber > 0 ? "Low Stock" : "Out of Stock"
-        
         const productData: any = {
           name: formData.name,
           category: formData.category,
-          stock: stockNumber,
-          status: status as 'Active' | 'Low Stock' | 'Out of Stock',
           description: formData.description,
           fullDescription: formData.fullDescription || formData.description,
           specs: formData.specs.split(',').map(spec => spec.trim()).filter(spec => spec),
@@ -136,7 +128,6 @@ export default function ProductsAdmin() {
         setFormData({ 
           name: "", 
           category: "", 
-          stock: "", 
           description: "", 
           fullDescription: "",
           specs: "", 
@@ -159,7 +150,6 @@ export default function ProductsAdmin() {
     setFormData({ 
       name: "", 
       category: "", 
-      stock: "", 
       description: "", 
       fullDescription: "",
       specs: "", 
@@ -200,7 +190,7 @@ export default function ProductsAdmin() {
               setFormData({ 
                 name: "", 
                 category: "", 
-                stock: "", 
+                
                 description: "", 
                 fullDescription: "",
                 specs: "", 
@@ -227,8 +217,7 @@ export default function ProductsAdmin() {
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-white">Product Name</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-white">Category</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-white">Stock</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-white">Status</th>
+                
                 <th className="px-6 py-3 text-left text-sm font-semibold text-white">Actions</th>
               </tr>
             </thead>
@@ -237,16 +226,7 @@ export default function ProductsAdmin() {
                 <tr key={item.id} className="border-b border-gray-700 hover:bg-gray-700/50 transition-colors">
                   <td className="px-6 py-4 text-white font-medium">{item.name}</td>
                   <td className="px-6 py-4 text-white/80">{item.category}</td>
-                  <td className="px-6 py-4 text-white/80">{item.stock}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        item.status === "Active" ? "bg-green-50 text-green-600" : "bg-yellow-50 text-yellow-600"
-                      }`}
-                    >
-                      {item.status}
-                    </span>
-                  </td>
+                  
                   <td className="px-6 py-4 flex gap-2">
                     <button
                       onClick={() => handleEdit(item)}
@@ -307,16 +287,7 @@ export default function ProductsAdmin() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Stock</label>
-                <input
-                  type="number"
-                  value={formData.stock}
-                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Enter stock quantity"
-                />
-              </div>
+              
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">Description</label>

@@ -14,8 +14,6 @@ export const seedProducts = async (): Promise<void> => {
       rating: 4.8,
       reviews: 324,
       price: 1299,
-      stock: 45,
-      status: "Active",
       featured: true,
     },
     {
@@ -29,8 +27,6 @@ export const seedProducts = async (): Promise<void> => {
       rating: 4.9,
       reviews: 512,
       price: 1899,
-      stock: 32,
-      status: "Active",
       featured: true,
     },
     {
@@ -44,8 +40,6 @@ export const seedProducts = async (): Promise<void> => {
       rating: 4.7,
       reviews: 287,
       price: 2499,
-      stock: 18,
-      status: "Active",
       featured: true,
     },
     {
@@ -59,8 +53,6 @@ export const seedProducts = async (): Promise<void> => {
       rating: 4.6,
       reviews: 198,
       price: 1599,
-      stock: 25,
-      status: "Active",
       featured: false,
     },
     {
@@ -74,8 +66,6 @@ export const seedProducts = async (): Promise<void> => {
       rating: 4.5,
       reviews: 156,
       price: 899,
-      stock: 12,
-      status: "Low Stock",
       featured: true,
     },
     {
@@ -89,8 +79,6 @@ export const seedProducts = async (): Promise<void> => {
       rating: 4.4,
       reviews: 142,
       price: 1299,
-      stock: 8,
-      status: "Low Stock",
       featured: false,
     },
     {
@@ -104,8 +92,6 @@ export const seedProducts = async (): Promise<void> => {
       rating: 4.8,
       reviews: 267,
       price: 599,
-      stock: 67,
-      status: "Active",
       featured: true,
     },
     {
@@ -119,8 +105,6 @@ export const seedProducts = async (): Promise<void> => {
       rating: 4.9,
       reviews: 891,
       price: 399,
-      stock: 89,
-      status: "Active",
       featured: true,
     },
   ]

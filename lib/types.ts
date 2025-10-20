@@ -10,8 +10,6 @@ export interface Product {
   rating: number
   reviews: number
   price?: number
-  stock: number
-  status: 'Active' | 'Low Stock' | 'Out of Stock'
   featured: boolean
   createdAt: Date
   updatedAt: Date

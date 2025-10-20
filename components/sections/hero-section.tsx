@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 
 export default function HeroSection() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -28,31 +27,26 @@ export default function HeroSection() {
               isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            Premium Tech for Every Need
+            Premium Tech Solutions
           </h1>
           <p
             className={`text-lg md:text-xl text-gray-100 mb-8 text-balance transition-all duration-1000 delay-200 ${
               isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            Discover our curated collection of premium laptops, desktops, and audio equipment designed for professionals and enthusiasts.
+            Discover cutting-edge laptops, desktops, network devices, and audio equipment. Your trusted partner for all
+            technology needs.
           </p>
-          <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 ${
-            isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-          }`} style={{ transitionDelay: isLoaded ? "0.4s" : "0s" }}>
-            <Link
-              href="/products"
-              className="bg-primary hover:bg-accent text-primary-foreground px-6 md:px-8 py-3 rounded-full font-bold text-base md:text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
-            >
-              Shop Now
-            </Link>
-            <Link
-              href="/about"
-              className="bg-transparent border border-white/60 text-white hover:bg-white/10 px-6 md:px-8 py-3 rounded-full font-semibold text-base md:text-lg transition-colors"
-            >
-              Learn More
-            </Link>
-          </div>
+          <button
+            className={`bg-primary hover:bg-accent text-primary-foreground px-8 py-3 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover-lift ${
+              isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+            }`}
+            style={{
+              transitionDelay: isLoaded ? "0.4s" : "0s",
+            }}
+          >
+            Shop Now
+          </button>
         </div>
       </div>
 

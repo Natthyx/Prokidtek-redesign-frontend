@@ -35,16 +35,16 @@ export default function ContactInfo() {
         return (
           <div
             key={detail.title}
-            className="bg-card rounded-lg p-6 border border-border shadow-2xl shadow-black/20 hover:shadow-2xl hover:shadow-black/30 transition-all duration-300"
+            className="bg-gray-800 rounded-lg p-6 border border-gray-700 shadow-lg transition-all duration-300 hover:shadow-orange-500/25 hover:border-orange-500/50 transform hover:scale-105 relative z-10"
           >
             <div className="flex gap-4">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Icon size={24} className="text-primary" />
               </div>
               <div>
-                <h3 className="font-bold text-foreground mb-1">{detail.title}</h3>
-                <p className="text-foreground font-semibold">{detail.content}</p>
-                <p className="text-foreground/60 text-sm">{detail.subtext}</p>
+                <h3 className="font-bold text-white mb-1">{detail.title}</h3>
+                <p className="text-white font-semibold">{detail.content}</p>
+                <p className="text-white/70 text-sm">{detail.subtext}</p>
               </div>
             </div>
           </div>

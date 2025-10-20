@@ -38,7 +38,7 @@ export default function BestSelling() {
           {products.map((product, idx) => (
             <div
               key={product.id}
-              className={`bg-card rounded-3xl overflow-hidden shadow-2xl hover:shadow-primary/30 transition-all duration-500 transform hover:scale-105 animate-fade-in-up stagger-item-${idx + 1}`}
+              className={`bg-card rounded-3xl overflow-hidden shadow-2xl transition-all duration-500 transform hover:scale-105 hover:shadow-orange-500/25 hover:border-orange-500/50 border border-border animate-fade-in-up stagger-item-${idx + 1}`}
             >
               <div className="h-56 bg-muted overflow-hidden">
                 <img

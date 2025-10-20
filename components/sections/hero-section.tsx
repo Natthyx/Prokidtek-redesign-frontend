@@ -20,7 +20,7 @@ export default function HeroSection() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/60"></div>
       </div>
 
-      <div className="relative h-full flex items-center justify-center text-center px-4">
+      <div className="relative h-full flex items-center justify-start text-left px-4 md:px-10">
         <div className="max-w-2xl">
           <h1
             className={`text-4xl md:text-6xl font-bold text-white mb-4 text-balance transition-all duration-1000 ${

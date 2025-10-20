@@ -184,15 +184,15 @@ export default function ProductsAdmin() {
   }
 
   return (
-    <div className="min-h-screen bg-muted">
+    <div className="min-h-screen bg-gray-900">
       {/* Header */}
-      <div className="bg-white border-b border-border shadow-sm">
+      <div className="bg-gray-800 border-b border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <Link href="/admin/dashboard" className="p-2 hover:bg-muted rounded-lg transition-colors">
+            <Link href="/admin/dashboard" className="p-2 hover:bg-gray-700 rounded-lg transition-colors text-white">
               <ArrowLeft size={24} />
             </Link>
-            <h1 className="text-2xl font-bold text-foreground">Product Details</h1>
+            <h1 className="text-2xl font-bold text-white">Product Details</h1>
           </div>
           <button
             onClick={() => {
@@ -221,23 +221,23 @@ export default function ProductsAdmin() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-700">
           <table className="w-full">
-            <thead className="bg-muted border-b border-border">
+            <thead className="bg-gray-900 border-b border-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Product Name</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Category</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Stock</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Status</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Actions</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-white">Product Name</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-white">Category</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-white">Stock</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-white">Status</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-white">Actions</th>
               </tr>
             </thead>
             <tbody>
               {products.map((item) => (
-                <tr key={item.id} className="border-b border-border hover:bg-muted/50 transition-colors">
-                  <td className="px-6 py-4 text-foreground font-medium">{item.name}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{item.category}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{item.stock}</td>
+                <tr key={item.id} className="border-b border-gray-700 hover:bg-gray-700/50 transition-colors">
+                  <td className="px-6 py-4 text-white font-medium">{item.name}</td>
+                  <td className="px-6 py-4 text-white/80">{item.category}</td>
+                  <td className="px-6 py-4 text-white/80">{item.stock}</td>
                   <td className="px-6 py-4">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -250,13 +250,13 @@ export default function ProductsAdmin() {
                   <td className="px-6 py-4 flex gap-2">
                     <button
                       onClick={() => handleEdit(item)}
-                      className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors hover:scale-110"
+                      className="p-2 hover:bg-blue-500/10 text-blue-400 rounded-lg transition-colors hover:scale-110"
                     >
                       <Edit2 size={18} />
                     </button>
                     <button
                       onClick={() => handleDelete(item.id)}
-                      className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors hover:scale-110"
+                      className="p-2 hover:bg-red-500/10 text-red-400 rounded-lg transition-colors hover:scale-110"
                     >
                       <Trash2 size={18} />
                     </button>

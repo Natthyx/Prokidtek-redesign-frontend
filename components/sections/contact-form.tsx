@@ -33,7 +33,7 @@ export default function ContactForm() {
   }
 
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-8 shadow-lg shadow-black/20">
+    <div className="bg-gray-800 rounded-lg border border-gray-700 p-8 shadow-lg transition-all duration-300 hover:shadow-orange-500/25 hover:border-orange-500/50">
       <h2 className="text-2xl font-bold text-white mb-6">Send us a Message</h2>
 
       {submitted && (

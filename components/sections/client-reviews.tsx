@@ -63,7 +63,7 @@ export default function ClientReviews() {
 
           <div className="flex flex-col items-center gap-4 mb-12">
             <img
-              src={review.photo || "/placeholder-user.jpg"}
+              src={(review as any).photo || "/placeholder-user.jpg"}
               alt={review.author}
               className="w-28 h-28 rounded-full object-cover shadow-xl border-2 border-primary"
             />

@@ -120,6 +120,36 @@ export const deleteProduct = async (id: string): Promise<boolean> => {
       }
     }
     
+    // Also remove the product from new arrivals collection
+    try {
+      const newArrivalsQuery = query(newArrivalsCollection, where('productId', '==', id))
+      const newArrivalsSnapshot = await getDocs(newArrivalsQuery)
+      const deleteNewArrivalsPromises = newArrivalsSnapshot.docs.map(doc => deleteDoc(doc.ref))
+      await Promise.all(deleteNewArrivalsPromises)
+    } catch (error) {
+      console.error('Error deleting product from new arrivals:', error)
+    }
+    
+    // Also remove the product from best selling collection
+    try {
+      const bestSellingQuery = query(bestSellingCollection, where('productId', '==', id))
+      const bestSellingSnapshot = await getDocs(bestSellingQuery)
+      const deleteBestSellingPromises = bestSellingSnapshot.docs.map(doc => deleteDoc(doc.ref))
+      await Promise.all(deleteBestSellingPromises)
+    } catch (error) {
+      console.error('Error deleting product from best selling:', error)
+    }
+    
+    // Also remove all reviews associated with this product
+    try {
+      const reviewsQuery = query(reviewsCollection, where('productId', '==', id))
+      const reviewsSnapshot = await getDocs(reviewsQuery)
+      const deleteReviewsPromises = reviewsSnapshot.docs.map(doc => deleteDoc(doc.ref))
+      await Promise.all(deleteReviewsPromises)
+    } catch (error) {
+      console.error('Error deleting product reviews:', error)
+    }
+    
     return true
   } catch (error) {
     console.error('Error deleting product:', error)
@@ -156,6 +186,17 @@ export const addNewArrival = async (newArrival: Omit<NewArrival, 'id'>): Promise
   }
 }
 
+export const deleteNewArrival = async (id: string): Promise<boolean> => {
+  try {
+    const docRef = doc(newArrivalsCollection, id)
+    await deleteDoc(docRef)
+    return true
+  } catch (error) {
+    console.error('Error deleting new arrival:', error)
+    return false
+  }
+}
+
 // Best Selling Services
 export const getBestSelling = async (): Promise<BestSelling[]> => {
   try {
@@ -178,6 +219,29 @@ export const addBestSelling = async (bestSelling: Omit<BestSelling, 'id'>): Prom
   } catch (error) {
     console.error('Error adding best selling:', error)
     return null
+  }
+}
+
+export const deleteBestSelling = async (id: string): Promise<boolean> => {
+  try {
+    const docRef = doc(bestSellingCollection, id)
+    await deleteDoc(docRef)
+    return true
+  } catch (error) {
+    console.error('Error deleting best selling:', error)
+    return false
+  }
+}
+
+// Add update function for best selling products
+export const updateBestSelling = async (id: string, bestSelling: Partial<BestSelling>): Promise<boolean> => {
+  try {
+    const docRef = doc(bestSellingCollection, id)
+    await updateDoc(docRef, bestSelling)
+    return true
+  } catch (error) {
+    console.error('Error updating best selling:', error)
+    return false
   }
 }
 
@@ -235,13 +299,17 @@ export const deleteTestimonial = async (id: string): Promise<boolean> => {
 // Reviews Services
 export const getReviews = async (): Promise<Review[]> => {
   try {
-    const q = query(reviewsCollection, orderBy('createdAt', 'desc'))
-    const snapshot = await getDocs(q)
-    return snapshot.docs.map(doc => ({
+    const snapshot = await getDocs(reviewsCollection)
+    const reviews = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
       createdAt: doc.data().createdAt?.toDate() || new Date(),
     })) as Review[]
+    
+    // Sort by createdAt in descending order (newest first) in memory
+    return reviews.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
   } catch (error) {
     console.error('Error fetching reviews:', error)
     return []
@@ -250,13 +318,18 @@ export const getReviews = async (): Promise<Review[]> => {
 
 export const getProductReviews = async (productId: string): Promise<Review[]> => {
   try {
-    const q = query(reviewsCollection, where('productId', '==', productId), orderBy('createdAt', 'desc'))
+    const q = query(reviewsCollection, where('productId', '==', productId))
     const snapshot = await getDocs(q)
-    return snapshot.docs.map(doc => ({
+    const reviews = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
       createdAt: doc.data().createdAt?.toDate() || new Date(),
     })) as Review[]
+    
+    // Sort by createdAt in descending order (newest first) in memory
+    return reviews.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
   } catch (error) {
     console.error('Error fetching product reviews:', error)
     return []
@@ -273,6 +346,17 @@ export const addReview = async (review: Omit<Review, 'id' | 'createdAt'>): Promi
   } catch (error) {
     console.error('Error adding review:', error)
     return null
+  }
+}
+
+export const deleteReview = async (id: string): Promise<boolean> => {
+  try {
+    const docRef = doc(reviewsCollection, id)
+    await deleteDoc(docRef)
+    return true
+  } catch (error) {
+    console.error('Error deleting review:', error)
+    return false
   }
 }
 

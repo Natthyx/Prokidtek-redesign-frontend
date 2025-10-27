@@ -26,35 +26,32 @@ export default function MultipleFileUpload({
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Compress image to fit within Firebase limits
-  const compressImage = (file: File, quality: number = 0.6): Promise<string> => {
+  const compressImage = (file: File, quality: number = 0.8): Promise<string> => {
     return new Promise((resolve, reject) => {
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
       const img = new Image()
       
       img.onload = () => {
-        // Calculate new dimensions (max 300px width to keep size small)
-        const maxWidth = 300
-        const maxHeight = 200
+        // Calculate new dimensions (increased to 800px width for better quality)
+        const maxWidth = 800
+        const maxHeight = 600
         let { width, height } = img
         
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width
-          width = maxWidth
-        }
-        
-        if (height > maxHeight) {
-          width = (width * maxHeight) / height
-          height = maxHeight
+        // Only scale down if image is larger than max dimensions
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height)
+          width = width * ratio
+          height = height * ratio
         }
         
         canvas.width = width
         canvas.height = height
         
-        // Draw and compress
+        // Draw and compress with better quality
         ctx?.drawImage(img, 0, 0, width, height)
         
-        // Convert to base64 with compression
+        // Convert to base64 with better quality (80% instead of 50%)
         const compressedDataUrl = canvas.toDataURL('image/jpeg', quality)
         resolve(compressedDataUrl)
       }
@@ -88,8 +85,8 @@ export default function MultipleFileUpload({
         console.log(`Processing real photo ${index + 1}/${validFiles.length}:`, file.name)
         
         try {
-          // Compress the actual photo
-          const compressedImage = await compressImage(file, 0.5) // 50% quality for small size
+          // Compress the actual photo with better quality
+          const compressedImage = await compressImage(file, 0.8) // 80% quality for better quality
           
           console.log('Photo compressed successfully:', file.name)
           return compressedImage

@@ -26,9 +26,9 @@ export default function AboutPage() {
       <div className="bg-primary/5">
         <ProductsWeOffer />
       </div>
-      <div className="bg-white">
+      {/* <div className="bg-white">
         <GovernmentTestimonials />
-      </div>
+      </div> */}
       <div className="bg-primary/5">
         <AboutHero />
       </div>
@@ -38,9 +38,9 @@ export default function AboutPage() {
       <div className="bg-primary/5">
         <AboutValues />
       </div>
-      <div className="bg-white">
+      {/* <div className="bg-white">
         <AboutTeam />
-      </div>
+      </div> */}
       <Footer />
     </main>
   )

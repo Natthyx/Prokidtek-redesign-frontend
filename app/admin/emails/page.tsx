@@ -4,44 +4,25 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Trash2, Eye } from "lucide-react"
-
-interface Email {
-  id: string
-  from: string
-  subject: string
-  message: string
-  date: string
-  read: boolean
-}
+import { getContactEmails, deleteContactEmail, markEmailAsRead } from "@/lib/firebase-services"
+import { ContactEmail } from "@/lib/types"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function EmailsAdmin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [emails, setEmails] = useState<Email[]>([
-    {
-      id: "1",
-      from: "customer@example.com",
-      subject: "Product Inquiry",
-      message: "I would like to know more about your MacBook Pro 16 specifications.",
-      date: "2025-01-15",
-      read: false,
-    },
-    {
-      id: "2",
-      from: "business@company.com",
-      subject: "Bulk Order Request",
-      message: "We are interested in ordering 50 units of Dell XPS 13 laptops.",
-      date: "2025-01-14",
-      read: true,
-    },
-    {
-      id: "3",
-      from: "support@email.com",
-      subject: "Technical Support",
-      message: "I need help with my Sony headphones warranty claim.",
-      date: "2025-01-13",
-      read: false,
-    },
-  ])
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [emails, setEmails] = useState<ContactEmail[]>([])
   const router = useRouter()
 
   useEffect(() => {
@@ -50,18 +31,72 @@ export default function EmailsAdmin() {
       router.push("/admin/login")
     } else {
       setIsAuthenticated(true)
+      fetchEmails()
     }
   }, [router])
 
-  const handleDelete = (id: string) => {
-    setEmails(emails.filter((item) => item.id !== id))
+  const fetchEmails = async () => {
+    try {
+      setLoading(true)
+      const data = await getContactEmails()
+      setEmails(data)
+    } catch (error) {
+      console.error('Error fetching emails:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleMarkAsRead = (id: string) => {
-    setEmails(emails.map((email) => (email.id === id ? { ...email, read: true } : email)))
+  const handleDeleteClick = (id: string) => {
+    setItemToDelete(id)
+    setShowDeleteDialog(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (itemToDelete) {
+      try {
+        const success = await deleteContactEmail(itemToDelete)
+        if (success) {
+          setEmails(emails.filter((item) => item.id !== itemToDelete))
+        } else {
+          alert('Failed to delete email')
+        }
+      } catch (error) {
+        console.error('Error deleting email:', error)
+        alert('Failed to delete email')
+      } finally {
+        setShowDeleteDialog(false)
+        setItemToDelete(null)
+      }
+    }
+  }
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      const success = await markEmailAsRead(id)
+      if (success) {
+        setEmails(emails.map((email) => (email.id === id ? { ...email, read: true } : email)))
+      } else {
+        alert('Failed to mark email as read')
+      }
+    } catch (error) {
+      console.error('Error marking email as read:', error)
+      alert('Failed to mark email as read')
+    }
   }
 
   if (!isAuthenticated) return null
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-muted flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading emails...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-muted">
@@ -94,18 +129,20 @@ export default function EmailsAdmin() {
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    From: {email.from} • {email.date}
+                    From: {email.name} ({email.email}) {email.phone ? `• Phone: ${email.phone}` : ''} • {email.createdAt instanceof Date ? email.createdAt.toLocaleDateString() : new Date().toLocaleDateString()}
                   </p>
                 </div>
                 <div className="flex gap-2">
+                  {!email.read && (
+                    <button
+                      onClick={() => handleMarkAsRead(email.id)}
+                      className="p-2 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
+                    >
+                      <Eye size={18} />
+                    </button>
+                  )}
                   <button
-                    onClick={() => handleMarkAsRead(email.id)}
-                    className="p-2 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
-                  >
-                    <Eye size={18} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(email.id)}
+                    onClick={() => handleDeleteClick(email.id)}
                     className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
                   >
                     <Trash2 size={18} />
@@ -117,6 +154,24 @@ export default function EmailsAdmin() {
           ))}
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the contact email.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

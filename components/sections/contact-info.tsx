@@ -5,8 +5,8 @@ export default function ContactInfo() {
     {
       icon: Phone,
       title: "Phone",
-      content: "+1 (555) 123-4567",
-      subtext: "Mon-Fri, 9AM-6PM EST",
+      content: "011-5-54-08-57/58",
+      subtext: "Mon-Sat, 9AM-8PM",
     },
     {
       icon: Mail,
@@ -17,14 +17,14 @@ export default function ContactInfo() {
     {
       icon: MapPin,
       title: "Address",
-      content: "123 Tech Street",
-      subtext: "City, State 12345",
+      content: "Aberus Building ground floor rom. No G03",
+      subtext: "Bole Dembel, Addis Ababa,Ethiopia",
     },
     {
       icon: Clock,
       title: "Business Hours",
-      content: "Monday - Friday",
-      subtext: "9:00 AM - 6:00 PM EST",
+      content: "Monday - Sunday",
+      subtext: "9:00 AM - 8:00 PM",
     },
   ]
 

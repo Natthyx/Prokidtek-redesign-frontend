@@ -3,43 +3,31 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Plus, Edit2, Trash2, X } from "lucide-react"
+import { ArrowLeft, Plus, Edit2, Trash2, X, Loader2 } from "lucide-react"
 import FileUpload from "@/components/ui/file-upload"
-
-interface Testimonial {
-  id: string
-  quote: string
-  author: string
-  company: string
-  logo: string
-  rating: number
-}
+import { getTestimonials, addTestimonial, updateTestimonial, deleteTestimonial } from "@/lib/firebase-services"
+import { Testimonial as FirebaseTestimonial } from "@/lib/types"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function TestimonialsAdmin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false) // Add submitting state
   const [formData, setFormData] = useState({ quote: "", author: "", company: "", logo: "", rating: "5" })
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([
-    {
-      id: "1",
-      quote:
-        "ProKidTek transformed our IT infrastructure. Their team was professional, responsive, and delivered exactly what we needed.",
-      author: "James Wilson",
-      company: "TechCorp",
-      logo: "🏢",
-      rating: 5,
-    },
-    {
-      id: "2",
-      quote:
-        "Outstanding service and support. ProKidTek has been a reliable partner for our technology needs for over 5 years.",
-      author: "Maria Garcia",
-      company: "GlobalSystems",
-      logo: "🌍",
-      rating: 5,
-    },
-  ])
+  const [testimonials, setTestimonials] = useState<FirebaseTestimonial[]>([])
   const router = useRouter()
 
   useEffect(() => {
@@ -48,14 +36,47 @@ export default function TestimonialsAdmin() {
       router.push("/admin/login")
     } else {
       setIsAuthenticated(true)
+      fetchTestimonials()
     }
   }, [router])
 
-  const handleDelete = (id: string) => {
-    setTestimonials(testimonials.filter((item) => item.id !== id))
+  const fetchTestimonials = async () => {
+    try {
+      setLoading(true)
+      const data = await getTestimonials()
+      setTestimonials(data)
+    } catch (error) {
+      console.error('Error fetching testimonials:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleEdit = (testimonial: Testimonial) => {
+  const handleDeleteClick = (id: string) => {
+    setItemToDelete(id)
+    setShowDeleteDialog(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (itemToDelete) {
+      try {
+        const success = await deleteTestimonial(itemToDelete)
+        if (success) {
+          setTestimonials(testimonials.filter((item: FirebaseTestimonial) => item.id !== itemToDelete))
+        } else {
+          alert('Failed to delete testimonial')
+        }
+      } catch (error) {
+        console.error('Error deleting testimonial:', error)
+        alert('Failed to delete testimonial')
+      } finally {
+        setShowDeleteDialog(false)
+        setItemToDelete(null)
+      }
+    }
+  }
+
+  const handleEdit = (testimonial: FirebaseTestimonial) => {
     setEditingId(testimonial.id)
     setFormData({
       quote: testimonial.quote,
@@ -67,37 +88,44 @@ export default function TestimonialsAdmin() {
     setShowModal(true)
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (formData.quote && formData.author && formData.company && formData.logo && formData.rating) {
-      if (editingId) {
-        setTestimonials(
-          testimonials.map((item) =>
-            item.id === editingId
-              ? {
-                  ...item,
-                  quote: formData.quote,
-                  author: formData.author,
-                  company: formData.company,
-                  logo: formData.logo,
-                  rating: Number.parseInt(formData.rating),
-                }
-              : item,
-          ),
-        )
-        setEditingId(null)
-      } else {
-        const newTestimonial: Testimonial = {
-          id: Date.now().toString(),
+      try {
+        setIsSubmitting(true) // Set submitting state to true
+        
+        const testimonialData = {
           quote: formData.quote,
           author: formData.author,
           company: formData.company,
           logo: formData.logo,
           rating: Number.parseInt(formData.rating),
+          featured: false,
         }
-        setTestimonials([...testimonials, newTestimonial])
+
+        if (editingId) {
+          const success = await updateTestimonial(editingId, testimonialData)
+          if (success) {
+            await fetchTestimonials() // Refresh the testimonials list
+            setEditingId(null)
+          } else {
+            alert('Failed to update testimonial')
+          }
+        } else {
+          const testimonialId = await addTestimonial(testimonialData)
+          if (testimonialId) {
+            await fetchTestimonials() // Refresh the testimonials list
+          } else {
+            alert('Failed to add testimonial')
+          }
+        }
+        setFormData({ quote: "", author: "", company: "", logo: "", rating: "5" })
+        setShowModal(false)
+      } catch (error) {
+        console.error('Error saving testimonial:', error)
+        alert('Failed to save testimonial')
+      } finally {
+        setIsSubmitting(false) // Reset submitting state
       }
-      setFormData({ quote: "", author: "", company: "", logo: "", rating: "5" })
-      setShowModal(false)
     }
   }
 
@@ -108,6 +136,17 @@ export default function TestimonialsAdmin() {
   }
 
   if (!isAuthenticated) return null
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-muted flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading testimonials...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-muted">
@@ -137,7 +176,7 @@ export default function TestimonialsAdmin() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {testimonials.map((item) => (
             <div key={item.id} className="bg-white rounded-xl shadow-sm p-6 hover:shadow-lg transition-all">
-              <div className="text-4xl mb-3">{item.logo}</div>
+              {/* <div className="text-4xl mb-3">{item.logo}</div> */}
               <p className="text-sm text-muted-foreground mb-4 line-clamp-3 italic">"{item.quote}"</p>
               <div className="border-t pt-3 mb-4">
                 <p className="font-semibold text-foreground">{item.author}</p>
@@ -151,7 +190,7 @@ export default function TestimonialsAdmin() {
                   <Edit2 size={18} className="mx-auto" />
                 </button>
                 <button
-                  onClick={() => handleDelete(item.id)}
+                  onClick={() => handleDeleteClick(item.id)}
                   className="flex-1 p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
                 >
                   <Trash2 size={18} className="mx-auto" />
@@ -208,14 +247,14 @@ export default function TestimonialsAdmin() {
                 />
               </div>
 
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-foreground mb-2">Company Logo</label>
                 <FileUpload
                   value={formData.logo}
                   onChange={(value) => setFormData({ ...formData, logo: value })}
                   placeholder="Choose a company logo"
                 />
-              </div>
+              </div> */}
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">Rating</label>
@@ -234,20 +273,47 @@ export default function TestimonialsAdmin() {
                 <button
                   onClick={handleCloseModal}
                   className="flex-1 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors font-medium"
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+                  className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center justify-center"
+                  disabled={isSubmitting}
                 >
-                  {editingId ? "Update" : "Add"} Testimonial
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {editingId ? "Updating..." : "Adding..."}
+                    </>
+                  ) : (
+                    <>{editingId ? "Update" : "Add"} Testimonial</>
+                  )}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the testimonial.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

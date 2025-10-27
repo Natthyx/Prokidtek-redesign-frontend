@@ -3,10 +3,22 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Plus, Edit2, Trash2, X } from "lucide-react"
+import { ArrowLeft, Plus, Edit2, Trash2, X, Loader2 } from "lucide-react"
+import { getTestimonials, addTestimonial, updateTestimonial, deleteTestimonial } from "@/lib/firebase-services"
+import { Testimonial as FirebaseTestimonial } from "@/lib/types"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
-interface Review {
-  id: number
+interface ReviewDisplay {
+  id: string
   name: string
   company: string
   text: string
@@ -17,26 +29,13 @@ interface Review {
 export default function HomeReviewsAdmin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [showModal, setShowModal] = useState(false)
-  const [editingId, setEditingId] = useState<number | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false) // Add submitting state
   const [formData, setFormData] = useState({ name: "", company: "", text: "", rating: "5", logo: "" })
-  const [reviews, setReviews] = useState<Review[]>([
-    {
-      id: 1,
-      name: "Yonas Mekonnen",
-      company: "Yonas Mobile",
-      text: "Working with ProKidTek has been a great experience. Their team is professional, responsive, and always willing to go the extra mile.",
-      rating: 5,
-      logo: "bg-gradient-to-br from-purple-500 to-purple-700",
-    },
-    {
-      id: 2,
-      name: "John Smith",
-      company: "Tech Corp",
-      text: "ProKidTek provided exceptional service and quality products. Highly recommended!",
-      rating: 5,
-      logo: "bg-gradient-to-br from-blue-500 to-blue-700",
-    },
-  ])
+  const [reviews, setReviews] = useState<ReviewDisplay[]>([])
   const router = useRouter()
 
   useEffect(() => {
@@ -45,14 +44,60 @@ export default function HomeReviewsAdmin() {
       router.push("/admin/login")
     } else {
       setIsAuthenticated(true)
+      fetchHomeReviews()
     }
   }, [router])
 
-  const handleDelete = (id: number) => {
-    setReviews(reviews.filter((item) => item.id !== id))
+  const fetchHomeReviews = async () => {
+    try {
+      setLoading(true)
+      const data = await getTestimonials()
+      
+      // Filter for non-featured testimonials (home reviews) and transform to display format
+      const displayData = data
+        .filter(item => !item.featured) // Non-featured testimonials are for home page
+        .map(item => ({
+          id: item.id,
+          name: item.author,
+          company: item.company,
+          text: item.quote,
+          rating: item.rating,
+          logo: item.logo || "bg-gradient-to-br from-purple-500 to-purple-700",
+        }))
+      
+      setReviews(displayData)
+    } catch (error) {
+      console.error('Error fetching home reviews:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleEdit = (review: Review) => {
+  const handleDeleteClick = (id: string) => {
+    setItemToDelete(id)
+    setShowDeleteDialog(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (itemToDelete) {
+      try {
+        const success = await deleteTestimonial(itemToDelete)
+        if (success) {
+          setReviews(reviews.filter((item) => item.id !== itemToDelete))
+        } else {
+          alert('Failed to delete review')
+        }
+      } catch (error) {
+        console.error('Error deleting review:', error)
+        alert('Failed to delete review')
+      } finally {
+        setShowDeleteDialog(false)
+        setItemToDelete(null)
+      }
+    }
+  }
+
+  const handleEdit = (review: ReviewDisplay) => {
     setEditingId(review.id)
     setFormData({
       name: review.name,
@@ -64,37 +109,45 @@ export default function HomeReviewsAdmin() {
     setShowModal(true)
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (formData.name && formData.company && formData.text && formData.rating && formData.logo) {
-      if (editingId) {
-        setReviews(
-          reviews.map((item) =>
-            item.id === editingId
-              ? {
-                  ...item,
-                  name: formData.name,
-                  company: formData.company,
-                  text: formData.text,
-                  rating: Number.parseInt(formData.rating),
-                  logo: formData.logo,
-                }
-              : item,
-          ),
-        )
-        setEditingId(null)
-      } else {
-        const newReview: Review = {
-          id: Date.now(),
-          name: formData.name,
+      try {
+        setIsSubmitting(true) // Set submitting state to true
+        
+        const testimonialData = {
+          quote: formData.text,
+          author: formData.name,
           company: formData.company,
-          text: formData.text,
-          rating: Number.parseInt(formData.rating),
           logo: formData.logo,
+          rating: Number.parseInt(formData.rating),
+          featured: false, // Home reviews are non-featured
+          createdAt: new Date(),
         }
-        setReviews([...reviews, newReview])
+
+        if (editingId) {
+          const success = await updateTestimonial(editingId, testimonialData)
+          if (success) {
+            await fetchHomeReviews() // Refresh the reviews list
+            setEditingId(null)
+          } else {
+            alert('Failed to update review')
+          }
+        } else {
+          const testimonialId = await addTestimonial(testimonialData)
+          if (testimonialId) {
+            await fetchHomeReviews() // Refresh the reviews list
+          } else {
+            alert('Failed to add review')
+          }
+        }
+        setFormData({ name: "", company: "", text: "", rating: "5", logo: "" })
+        setShowModal(false)
+      } catch (error) {
+        console.error('Error saving review:', error)
+        alert('Failed to save review')
+      } finally {
+        setIsSubmitting(false) // Reset submitting state
       }
-      setFormData({ name: "", company: "", text: "", rating: "5", logo: "" })
-      setShowModal(false)
     }
   }
 
@@ -105,6 +158,17 @@ export default function HomeReviewsAdmin() {
   }
 
   if (!isAuthenticated) return null
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-muted flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading home reviews...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-muted">
@@ -148,7 +212,7 @@ export default function HomeReviewsAdmin() {
                   <Edit2 size={18} className="mx-auto" />
                 </button>
                 <button
-                  onClick={() => handleDelete(item.id)}
+                  onClick={() => handleDeleteClick(item.id)}
                   className="flex-1 p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
                 >
                   <Trash2 size={18} className="mx-auto" />
@@ -199,25 +263,8 @@ export default function HomeReviewsAdmin() {
                   onChange={(e) => setFormData({ ...formData, text: e.target.value })}
                   className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                   placeholder="Enter review text"
-                  rows={4}
+                  rows={3}
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Logo Gradient</label>
-                <select
-                  value={formData.logo}
-                  onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">Select gradient</option>
-                  <option value="bg-gradient-to-br from-purple-500 to-purple-700">Purple</option>
-                  <option value="bg-gradient-to-br from-blue-500 to-blue-700">Blue</option>
-                  <option value="bg-gradient-to-br from-green-500 to-green-700">Green</option>
-                  <option value="bg-gradient-to-br from-orange-500 to-orange-700">Orange</option>
-                  <option value="bg-gradient-to-br from-pink-500 to-pink-700">Pink</option>
-                  <option value="bg-gradient-to-br from-red-500 to-red-700">Red</option>
-                </select>
               </div>
 
               <div>
@@ -227,9 +274,26 @@ export default function HomeReviewsAdmin() {
                   onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
                   className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 >
-                  <option value="5">5 Stars</option>
-                  <option value="4">4 Stars</option>
+                  <option value="1">1 Star</option>
+                  <option value="2">2 Stars</option>
                   <option value="3">3 Stars</option>
+                  <option value="4">4 Stars</option>
+                  <option value="5">5 Stars</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Logo Style</label>
+                <select
+                  value={formData.logo}
+                  onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="bg-gradient-to-br from-purple-500 to-purple-700">Purple Gradient</option>
+                  <option value="bg-gradient-to-br from-blue-500 to-blue-700">Blue Gradient</option>
+                  <option value="bg-gradient-to-br from-green-500 to-green-700">Green Gradient</option>
+                  <option value="bg-gradient-to-br from-red-500 to-red-700">Red Gradient</option>
+                  <option value="bg-gradient-to-br from-yellow-500 to-yellow-700">Yellow Gradient</option>
                 </select>
               </div>
 
@@ -237,20 +301,47 @@ export default function HomeReviewsAdmin() {
                 <button
                   onClick={handleCloseModal}
                   className="flex-1 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors font-medium"
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+                  className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center justify-center"
+                  disabled={isSubmitting}
                 >
-                  {editingId ? "Update" : "Add"} Review
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {editingId ? "Updating..." : "Adding..."}
+                    </>
+                  ) : (
+                    <>{editingId ? "Update" : "Add"} Review</>
+                  )}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the home page review.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

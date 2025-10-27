@@ -3,53 +3,49 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Plus, Edit2, Trash2, X } from "lucide-react"
+import { ArrowLeft, Plus, Edit2, Trash2, X, Loader2 } from "lucide-react"
 import FileUpload from "@/components/ui/file-upload"
+import { getNewArrivals, addNewArrival, deleteNewArrival, getProducts } from "@/lib/firebase-services"
+import { NewArrival as FirebaseNewArrival, Product } from "@/lib/types"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
-interface NewArrival {
+interface NewArrivalDisplay {
   id: string
   name: string
   category: string
-  dateAdded: string
+  dateAdded: Date | string
   description: string
   specs: string
   image: string
+  productId: string // Add productId to the display interface
 }
 
 export default function NewArrivalsAdmin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [formData, setFormData] = useState({ name: "", category: "", description: "", specs: "", image: "" })
-  const [arrivals, setArrivals] = useState<NewArrival[]>([
-    {
-      id: "1",
-      name: "MacBook Pro 16",
-      category: "Laptops",
-      dateAdded: "2025-01-15",
-      description: "High-performance laptop",
-      specs: "Intel i7, 16GB RAM",
-      image: "/macbook-pro-16.jpg",
-    },
-    {
-      id: "2",
-      name: "Dell XPS 13",
-      category: "Laptops",
-      dateAdded: "2025-01-14",
-      description: "Ultra-portable laptop",
-      specs: "Intel i5, 8GB RAM",
-      image: "/dell-xps-13.jpg",
-    },
-    {
-      id: "3",
-      name: "HP Pavilion Desktop",
-      category: "Desktops",
-      dateAdded: "2025-01-13",
-      description: "Reliable desktop",
-      specs: "Intel i5, 16GB RAM",
-      image: "/hp-pavilion-desktop.jpg",
-    },
-  ])
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false) // Add submitting state
+  const [formData, setFormData] = useState({ 
+    productId: "", // Change from name to productId
+    category: "", 
+    description: "", 
+    specs: "", 
+    image: "" 
+  })
+  const [arrivals, setArrivals] = useState<NewArrivalDisplay[]>([])
+  const [products, setProducts] = useState<Product[]>([]) // Add state for all products
   const router = useRouter()
 
   const categories = ["Laptops", "Desktops", "Network Devices", "Audio Equipment", "Accessories"]
@@ -60,17 +56,95 @@ export default function NewArrivalsAdmin() {
       router.push("/admin/login")
     } else {
       setIsAuthenticated(true)
+      fetchAllProducts() // Fetch all products first
+      fetchNewArrivals()
     }
   }, [router])
 
-  const handleDelete = (id: string) => {
-    setArrivals(arrivals.filter((item) => item.id !== id))
+  const fetchAllProducts = async () => {
+    try {
+      const productData = await getProducts()
+      setProducts(productData)
+    } catch (error) {
+      console.error('Error fetching products:', error)
+    }
   }
 
-  const handleEdit = (arrival: NewArrival) => {
+  const fetchNewArrivals = async () => {
+    try {
+      setLoading(true)
+      const data = await getNewArrivals()
+      
+      // Transform Firebase NewArrival to display format by fetching actual product data
+      const displayData: NewArrivalDisplay[] = []
+      for (const item of data) {
+        try {
+          // Find the actual product in our products list
+          const product = products.find(p => p.id === item.productId)
+          if (product) {
+            displayData.push({
+              id: item.id,
+              name: product.name,
+              category: product.category || "Product",
+              dateAdded: item.dateAdded,
+              description: product.description || "Product description",
+              specs: product.specs ? product.specs.join(", ") : "",
+              image: product.image || "/placeholder.svg",
+              productId: item.productId
+            })
+          } else {
+            // If product not found, still show the item with productId
+            displayData.push({
+              id: item.id,
+              name: `Product ${item.productId} (Not Found)`,
+              category: "Product",
+              dateAdded: item.dateAdded,
+              description: "Product description",
+              specs: "",
+              image: "/placeholder.svg",
+              productId: item.productId
+            })
+          }
+        } catch (error) {
+          console.error(`Error fetching product ${item.productId}:`, error)
+        }
+      }
+      setArrivals(displayData)
+    } catch (error) {
+      console.error('Error fetching new arrivals:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteClick = (id: string) => {
+    setItemToDelete(id)
+    setShowDeleteDialog(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (itemToDelete) {
+      try {
+        const success = await deleteNewArrival(itemToDelete)
+        if (success) {
+          setArrivals(arrivals.filter((item: NewArrivalDisplay) => item.id !== itemToDelete))
+        } else {
+          alert('Failed to delete new arrival')
+        }
+      } catch (error) {
+        console.error('Error deleting new arrival:', error)
+        alert('Failed to delete new arrival')
+      } finally {
+        setShowDeleteDialog(false)
+        setItemToDelete(null)
+      }
+    }
+  }
+
+  const handleEdit = (arrival: NewArrivalDisplay) => {
     setEditingId(arrival.id)
     setFormData({
-      name: arrival.name,
+      productId: arrival.productId, // Use productId instead of name
       category: arrival.category,
       description: arrival.description,
       specs: arrival.specs,
@@ -79,48 +153,53 @@ export default function NewArrivalsAdmin() {
     setShowModal(true)
   }
 
-  const handleAddProduct = () => {
-    if (formData.name && formData.category && formData.description && formData.specs && formData.image) {
-      if (editingId) {
-        setArrivals(
-          arrivals.map((item) =>
-            item.id === editingId
-              ? {
-                  ...item,
-                  name: formData.name,
-                  category: formData.category,
-                  description: formData.description,
-                  specs: formData.specs,
-                  image: formData.image,
-                }
-              : item,
-          ),
-        )
-        setEditingId(null)
-      } else {
-        const newArrival: NewArrival = {
-          id: Date.now().toString(),
-          name: formData.name,
-          category: formData.category,
-          dateAdded: new Date().toISOString().split("T")[0],
-          description: formData.description,
-          specs: formData.specs,
-          image: formData.image,
+  const handleAddProduct = async () => {
+    if (formData.productId) { // Change validation to check productId
+      try {
+        setIsSubmitting(true) // Set submitting state to true
+        
+        // Create new arrival with actual product ID
+        const newArrivalData = {
+          productId: formData.productId, // Use actual product ID
+          featured: false,
+          dateAdded: new Date()
         }
-        setArrivals([newArrival, ...arrivals])
+
+        const arrivalId = await addNewArrival(newArrivalData)
+        if (arrivalId) {
+          await fetchNewArrivals() // Refresh the arrivals list
+        } else {
+          alert('Failed to add new arrival')
+        }
+        setFormData({ productId: "", category: "", description: "", specs: "", image: "" }) // Reset form
+        setShowModal(false)
+      } catch (error) {
+        console.error('Error saving new arrival:', error)
+        alert('Failed to save new arrival')
+      } finally {
+        setIsSubmitting(false) // Reset submitting state
       }
-      setFormData({ name: "", category: "", description: "", specs: "", image: "" })
-      setShowModal(false)
     }
   }
 
   const handleCloseModal = () => {
     setShowModal(false)
     setEditingId(null)
-    setFormData({ name: "", category: "", description: "", specs: "", image: "" })
+    setFormData({ productId: "", category: "", description: "", specs: "", image: "" }) // Reset form
   }
 
   if (!isAuthenticated) return null
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-muted flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading new arrivals...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-muted">
@@ -136,7 +215,7 @@ export default function NewArrivalsAdmin() {
           <button
             onClick={() => {
               setEditingId(null)
-              setFormData({ name: "", category: "", description: "", specs: "", image: "" })
+              setFormData({ productId: "", category: "", description: "", specs: "", image: "" }) // Reset form
               setShowModal(true)
             }}
             className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-300 font-medium hover:scale-105"
@@ -164,7 +243,9 @@ export default function NewArrivalsAdmin() {
                 <tr key={item.id} className="border-b border-border hover:bg-muted/50 transition-colors">
                   <td className="px-6 py-4 text-foreground font-medium">{item.name}</td>
                   <td className="px-6 py-4 text-muted-foreground">{item.category}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{item.dateAdded}</td>
+                  <td className="px-6 py-4 text-muted-foreground">
+                    {item.dateAdded instanceof Date ? item.dateAdded.toLocaleDateString() : item.dateAdded}
+                  </td>
                   <td className="px-6 py-4 flex gap-2">
                     <button
                       onClick={() => handleEdit(item)}
@@ -173,7 +254,7 @@ export default function NewArrivalsAdmin() {
                       <Edit2 size={18} />
                     </button>
                     <button
-                      onClick={() => handleDelete(item.id)}
+                      onClick={() => handleDeleteClick(item.id)}
                       className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors hover:scale-110"
                     >
                       <Trash2 size={18} />
@@ -201,14 +282,19 @@ export default function NewArrivalsAdmin() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Product Name</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                <label className="block text-sm font-medium text-foreground mb-2">Product</label>
+                <select
+                  value={formData.productId}
+                  onChange={(e) => setFormData({ ...formData, productId: e.target.value })}
                   className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Enter product name"
-                />
+                >
+                  <option value="">Select a product</option>
+                  {products.map((product) => (
+                    <option key={product.id} value={product.id}>
+                      {product.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -227,55 +313,51 @@ export default function NewArrivalsAdmin() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                  placeholder="Enter product description"
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Specifications</label>
-                <textarea
-                  value={formData.specs}
-                  onChange={(e) => setFormData({ ...formData, specs: e.target.value })}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                  placeholder="Enter specifications (e.g., Intel i7, 16GB RAM, 512GB SSD)"
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Product Image</label>
-                <FileUpload
-                  value={formData.image}
-                  onChange={(value) => setFormData({ ...formData, image: value })}
-                  placeholder="Choose a product image"
-                />
-              </div>
-
               <div className="flex gap-3 pt-4">
                 <button
                   onClick={handleCloseModal}
                   className="flex-1 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors font-medium"
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleAddProduct}
-                  className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+                  className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center justify-center"
+                  disabled={isSubmitting}
                 >
-                  {editingId ? "Update" : "Add"} Arrival
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {editingId ? "Updating..." : "Adding..."}
+                    </>
+                  ) : (
+                    <>{editingId ? "Update" : "Add"} Arrival</>
+                  )}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the new arrival.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

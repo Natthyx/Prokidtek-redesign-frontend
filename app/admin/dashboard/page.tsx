@@ -4,6 +4,14 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { LogOut, Package, Star, Mail, TrendingUp } from "lucide-react"
+import { 
+  getProducts, 
+  getNewArrivals, 
+  getBestSelling, 
+  getReviews, 
+  getContactEmails, 
+  getTestimonials 
+} from "@/lib/firebase-services"
 
 interface AdminStats {
   totalProducts: number
@@ -11,17 +19,22 @@ interface AdminStats {
   bestSelling: number
   totalReviews: number
   totalEmails: number
+  totalTestimonials: number
+  totalHomeReviews: number
 }
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [stats, setStats] = useState<AdminStats>({
-    totalProducts: 156,
-    newArrivals: 12,
-    bestSelling: 8,
-    totalReviews: 342,
-    totalEmails: 47,
+    totalProducts: 0,
+    newArrivals: 0,
+    bestSelling: 0,
+    totalReviews: 0,
+    totalEmails: 0,
+    totalTestimonials: 0,
+    totalHomeReviews: 0
   })
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
@@ -30,8 +43,39 @@ export default function AdminDashboard() {
       router.push("/admin/login")
     } else {
       setIsAuthenticated(true)
+      fetchDashboardStats()
     }
   }, [router])
+
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true)
+      
+      // Fetch all data in parallel
+      const [products, newArrivals, bestSelling, reviews, emails, testimonials] = await Promise.all([
+        getProducts(),
+        getNewArrivals(),
+        getBestSelling(),
+        getReviews(),
+        getContactEmails(),
+        getTestimonials()
+      ])
+
+      setStats({
+        totalProducts: products.length,
+        newArrivals: newArrivals.length,
+        bestSelling: bestSelling.length,
+        totalReviews: reviews.length,
+        totalEmails: emails.length,
+        totalTestimonials: testimonials.filter(t => t.featured).length,
+        totalHomeReviews: testimonials.filter(t => !t.featured).length
+      })
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleLogout = () => {
     localStorage.removeItem("adminSession")
@@ -66,14 +110,14 @@ export default function AdminDashboard() {
     },
     {
       title: "Client Testimonials",
-      count: 6,
+      count: stats.totalTestimonials,
       icon: Star,
       href: "/admin/testimonials",
       color: "bg-orange-50 text-orange-600",
     },
     {
       title: "Home Reviews",
-      count: 7,
+      count: stats.totalHomeReviews,
       icon: Star,
       href: "/admin/home-reviews",
       color: "bg-pink-50 text-pink-600",
@@ -100,6 +144,18 @@ export default function AdminDashboard() {
       color: "bg-indigo-50 text-indigo-600",
     },
   ]
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-muted flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-muted">

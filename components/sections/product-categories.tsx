@@ -1,12 +1,10 @@
 "use client"
 
-import { useState } from "react"
 import { Search } from "lucide-react"
+import { useProductFilter } from "@/contexts/product-filter-context"
 
 export default function ProductCategories() {
-  const [activeCategory, setActiveCategory] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [sortBy, setSortBy] = useState("featured")
+  const { activeCategory, setActiveCategory, searchQuery, setSearchQuery, sortBy, setSortBy } = useProductFilter()
 
   const categories = [
     { id: "all", label: "All Products" },

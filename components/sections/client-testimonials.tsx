@@ -2,62 +2,99 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Star } from "lucide-react"
+import { getTestimonials } from "@/lib/firebase-services"
+import { Testimonial as FirebaseTestimonial } from "@/lib/types"
+
+interface DisplayTestimonial {
+  quote: string
+  author: string
+  company: string
+  photo: string
+  rating: number
+}
 
 export default function ClientTestimonials() {
-  const testimonials = [
-    {
-      quote:
-        "ProKidTek transformed our IT infrastructure. Their team was professional, responsive, and delivered exactly what we needed.",
-      author: "James Wilson",
-      company: "TechCorp",
-      photo: "/professional-man-ceo.jpg",
-      rating: 5,
-    },
-    {
-      quote:
-        "Outstanding service and support. ProKidTek has been a reliable partner for our technology needs for over 5 years.",
-      author: "Maria Garcia",
-      company: "GlobalSystems",
-      photo: "/professional-woman-tech.jpg",
-      rating: 5,
-    },
-    {
-      quote:
-        "The quality of products and expertise of the team is unmatched. Highly recommended for any business looking for tech solutions.",
-      author: "David Chen",
-      company: "InnovateLabs",
-      photo: "/professional-man-sales.jpg",
-      rating: 5,
-    },
-    {
-      quote:
-        "Exceptional customer service and product quality. ProKidTek goes above and beyond to ensure customer satisfaction.",
-      author: "Sarah Johnson",
-      company: "DigitalFirst",
-      photo: "/professional-woman-service.jpg",
-      rating: 5,
-    },
-    {
-      quote:
-        "We've been working with ProKidTek for 3 years and they consistently deliver high-quality products and excellent support.",
-      author: "Ahmed Hassan",
-      company: "TechVision",
-      photo: "/professional-man-ceo.jpg",
-      rating: 5,
-    },
-    {
-      quote: "ProKidTek's commitment to excellence and innovation makes them our preferred technology partner.",
-      author: "Lisa Anderson",
-      company: "FutureWorks",
-      photo: "/professional-woman-tech.jpg",
-      rating: 5,
-    },
-  ]
-  // Build marquee rows similar to InternationalEventsExpo
+  const [testimonials, setTestimonials] = useState<DisplayTestimonial[]>([])
+  const [loading, setLoading] = useState(true)
   const sectionRef = useRef<HTMLDivElement>(null)
   const speedMs = 35000
-  const rowA = useMemo(() => [...testimonials, ...testimonials], [testimonials])
   const [isInView, setIsInView] = useState(false)
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        setLoading(true)
+        const firebaseTestimonials = await getTestimonials()
+        
+        // Transform to display format
+        const displayTestimonials = firebaseTestimonials.map(item => ({
+          quote: item.quote,
+          author: item.author,
+          company: item.company,
+          photo: "/placeholder-user.jpg", // Default placeholder
+          rating: item.rating
+        }))
+        
+        setTestimonials(displayTestimonials)
+      } catch (error) {
+        console.error('Error fetching testimonials:', error)
+        // Fallback to mock data in case of error
+        setTestimonials([
+          {
+            quote:
+              "ProKidTek transformed our IT infrastructure. Their team was professional, responsive, and delivered exactly what we needed.",
+            author: "James Wilson",
+            company: "TechCorp",
+            photo: "/professional-man-ceo.jpg",
+            rating: 5,
+          },
+          {
+            quote:
+              "Outstanding service and support. ProKidTek has been a reliable partner for our technology needs for over 5 years.",
+            author: "Maria Garcia",
+            company: "GlobalSystems",
+            photo: "/professional-woman-tech.jpg",
+            rating: 5,
+          },
+          {
+            quote:
+              "The quality of products and expertise of the team is unmatched. Highly recommended for any business looking for tech solutions.",
+            author: "David Chen",
+            company: "InnovateLabs",
+            photo: "/professional-man-sales.jpg",
+            rating: 5,
+          },
+          {
+            quote:
+              "Exceptional customer service and product quality. ProKidTek goes above and beyond to ensure customer satisfaction.",
+            author: "Sarah Johnson",
+            company: "DigitalFirst",
+            photo: "/professional-woman-service.jpg",
+            rating: 5,
+          },
+          {
+            quote:
+              "We've been working with ProKidTek for 3 years and they consistently deliver high-quality products and excellent support.",
+            author: "Ahmed Hassan",
+            company: "TechVision",
+            photo: "/professional-man-ceo.jpg",
+            rating: 5,
+          },
+          {
+            quote: "ProKidTek's commitment to excellence and innovation makes them our preferred technology partner.",
+            author: "Lisa Anderson",
+            company: "FutureWorks",
+            photo: "/professional-woman-tech.jpg",
+            rating: 5,
+          },
+        ])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchTestimonials()
+  }, [])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -67,6 +104,24 @@ export default function ClientTestimonials() {
     if (sectionRef.current) observer.observe(sectionRef.current)
     return () => observer.disconnect()
   }, [])
+
+  const rowA = useMemo(() => [...testimonials, ...testimonials], [testimonials])
+
+  if (loading) {
+    return (
+      <section className="py-20 px-4 bg-background">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Client Testimonials</h2>
+            <p className="text-xl text-foreground/70">
+              Hear from our satisfied clients about their experience with ProKidTek
+            </p>
+          </div>
+          <div className="h-64 bg-muted rounded-3xl animate-pulse"></div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="py-20 px-4 bg-background">
@@ -101,7 +156,7 @@ export default function ClientTestimonials() {
   )
 }
 
-function TestimonialCard({ t }: { t: { photo: string; author: string; company: string; rating: number; quote: string } }) {
+function TestimonialCard({ t }: { t: DisplayTestimonial }) {
   return (
     <div className="group relative w-[28rem] sm:w-[34rem] flex-shrink-0">
       <div className="bg-white rounded-3xl border border-primary/10 hover:border-primary/50 transition-all duration-300 shadow-lg hover:shadow-2xl animate-[testi-pulse_4000ms_ease-in-out_infinite] group-hover:scale-105 overflow-hidden">
@@ -114,7 +169,7 @@ function TestimonialCard({ t }: { t: { photo: string; author: string; company: s
           <div className="w-1/2 p-6 flex flex-col">
             <div className="flex gap-1 mb-3">
               {[...Array(t.rating)].map((_, i) => (
-                <svg key={i} viewBox="0 0 24 24" className="w-5 h-5 fill-primary text-primary"><path d="M12 .587l3.668 7.431 8.207 1.193-5.938 5.79 1.402 8.168L12 18.897l-7.339 3.872 1.402-8.168L.125 9.211l8.207-1.193z"/></svg>
+                <Star key={i} className="w-5 h-5 fill-primary text-primary" />
               ))}
             </div>
             {/* Short description to increase card height */}

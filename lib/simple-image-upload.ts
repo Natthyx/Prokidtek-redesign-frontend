@@ -63,19 +63,16 @@ const compressImage = (file: File, quality: number): Promise<File> => {
     const img = new Image()
     
     img.onload = () => {
-      // Calculate new dimensions (max 800px width)
+      // Calculate new dimensions (increased to 800px width for better quality)
       const maxWidth = 800
       const maxHeight = 600
       let { width, height } = img
       
-      if (width > maxWidth) {
-        height = (height * maxWidth) / width
-        width = maxWidth
-      }
-      
-      if (height > maxHeight) {
-        width = (width * maxHeight) / height
-        height = maxHeight
+      // Only scale down if image is larger than max dimensions
+      if (width > maxWidth || height > maxHeight) {
+        const ratio = Math.min(maxWidth / width, maxHeight / height)
+        width = width * ratio
+        height = height * ratio
       }
       
       canvas.width = width

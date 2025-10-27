@@ -95,7 +95,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex gap-2">
                 <Phone size={20} className="text-primary flex-shrink-0" />
-                <span className="text-gray-300">+1 (555) 123-4567</span>
+                <span className="text-gray-300">011-5-54-08-57/58</span>
               </li>
               <li className="flex gap-2">
                 <Mail size={20} className="text-primary flex-shrink-0" />
@@ -103,7 +103,7 @@ export default function Footer() {
               </li>
               <li className="flex gap-2">
                 <MapPin size={20} className="text-primary flex-shrink-0" />
-                <span className="text-gray-300">123 Tech Street, City, State</span>
+                <span className="text-gray-300"> Aberus Building ground floor rom. No G03</span>
               </li>
             </ul>
           </div>

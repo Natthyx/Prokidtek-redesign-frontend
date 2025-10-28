@@ -137,20 +137,6 @@ export default function ClientTestimonials() {
                 </div>
               ))}
             </div>
-            
-            {/* Dots indicator for mobile */}
-            <div className="flex justify-center mt-6 space-x-2">
-              {testimonials.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => goToSlide(idx)}
-                  className={`w-3 h-3 rounded-full transition-all ${
-                    idx === currentIndex ? 'bg-primary' : 'bg-gray-300'
-                  }`}
-                  aria-label={`Go to testimonial ${idx + 1}`}
-                />
-              ))}
-            </div>
           </div>
           
           {/* Continuous Marquee for Desktop with Auto Slide Animation */}
@@ -162,7 +148,7 @@ export default function ClientTestimonials() {
             <div
               className="flex gap-6"
               style={{ 
-                animation: isInView && !isHovered ? `slide-alternate 30s linear infinite alternate` : "none",
+                animation: "slide-alternate 30s linear infinite alternate",
                 width: "fit-content",
               }}
             >
@@ -178,7 +164,6 @@ export default function ClientTestimonials() {
               0% { transform: translateX(0); } 
               100% { transform: translateX(-50%); } 
             }
-            @keyframes testi-pulse { 0%,100% { transform: scale(1) } 50% { transform: scale(1.06) } }
           `}</style>
         </div>
       </div>
@@ -188,11 +173,11 @@ export default function ClientTestimonials() {
 
 function TestimonialCard({ t }: { t: DisplayTestimonial }) {
   return (
-    <div className="group relative w-[28rem] sm:w-[34rem] flex-shrink-0">
-      <div className="bg-white rounded-3xl border border-primary/10 hover:border-primary/50 transition-all duration-300 shadow-lg hover:shadow-2xl animate-[testi-pulse_4000ms_ease-in-out_infinite] group-hover:scale-105 overflow-hidden">
-        <div className="flex">
-          {/* Left: Image (half width) */}
-          <div className="w-1/2 h-56 sm:h-64 md:h-72">
+    <div className="group relative w-[23rem] sm:w-[20rem] md:w-[30rem] lg:w-[34rem] flex-shrink-0 mb-8">
+      <div className="bg-white rounded-3xl border border-primary/10 hover:border-primary/50 transition-all duration-300 shadow-lg hover:shadow-2xl overflow-hidden">
+        <div className="flex flex-col sm:flex-row">
+          {/* Left: Image */}
+          <div className="sm:w-1/2 h-35 sm:h-56 md:h-64 lg:h-72">
             <img 
               src={t.photo || '/placeholder-user.jpg'} 
               alt={t.author} 
@@ -205,19 +190,18 @@ function TestimonialCard({ t }: { t: DisplayTestimonial }) {
             />
           </div>
           {/* Right: Content */}
-          <div className="w-1/2 p-6 flex flex-col">
-            <div className="flex gap-1 mb-3">
+          <div className="sm:w-1/2 p-4 sm:p-7 flex flex-col">
+            <div className="flex gap-1 mb-2 sm:mb-3">
               {[...Array(t.rating)].map((_, i) => (
-                <Star key={i} className="w-5 h-5 fill-primary text-primary" />
+                <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-primary text-primary" />
               ))}
             </div>
-            {/* Short description to increase card height */}
-            <p className="text-foreground/80 text-sm sm:text-base leading-relaxed mb-4 line-clamp-5">
+            <p className="text-foreground/80 text-sm sm:text-base leading-relaxed mb-3 sm:mb-4 flex-grow">
               "{t.quote}"
             </p>
-            <div className="mt-auto border-t border-primary/10 pt-3">
-              <p className="font-semibold text-foreground">{t.author}</p>
-              <p className="text-sm text-foreground/60">{t.company}</p>
+            <div className="mt-auto border-t border-primary/10 pt-2 sm:pt-3">
+              <p className="font-semibold text-foreground text-sm sm:text-base">{t.author}</p>
+              <p className="text-xs sm:text-sm text-foreground/60">{t.company}</p>
             </div>
           </div>
         </div>

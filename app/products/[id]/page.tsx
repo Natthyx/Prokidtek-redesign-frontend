@@ -326,7 +326,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                 <ImageZoom
                   src={images[currentImageIndex] || "/placeholder.svg"}
                   alt={product.name}
-                  className="w-full h-96"
+                  className="w-full h-64 sm:h-80 md:h-96"
                 />
 
                 {/* Image Navigation - Only show if more than 1 image */}
@@ -360,7 +360,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                     <button
                       key={idx}
                       onClick={() => setCurrentImageIndex(idx)}
-                      className={`flex-shrink-0 w-16 h-16 rounded-xl transition-all duration-300 transform hover:scale-110 overflow-hidden ${
+                      className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl transition-all duration-300 transform hover:scale-110 overflow-hidden ${
                         idx === currentImageIndex ? "ring-2 ring-primary scale-110" : "opacity-60 hover:opacity-100"
                       }`}
                     >
@@ -380,7 +380,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
               className={`flex flex-col justify-center transition-all duration-700 transform ${isVisible ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"}`}
             >
               <p className="text-sm text-primary font-semibold mb-2 uppercase tracking-wide">{product.category}</p>
-              <h1 className="text-4xl font-bold text-foreground mb-4">{product.name}</h1>
+              <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">{product.name}</h1>
 
               {/* Rating */}
               <div className="flex items-center gap-4 mb-6">
@@ -395,7 +395,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
 
               {/* Description with expand/collapse */}
               <div className="mb-8">
-                <div className="text-lg text-foreground/80 leading-relaxed mb-4">
+                <div className="text-base sm:text-lg text-foreground/80 leading-relaxed mb-4">
                   {showFullDescription 
                     ? formatWithBullets(product.fullDescription, true) 
                     : formatWithBullets(truncateDescription(product.fullDescription), true)}

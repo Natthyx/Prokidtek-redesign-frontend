@@ -54,30 +54,30 @@ export default function BestSelling() {
   }, [])
 
   // Function to render star ratings with proper half-star support
-  const renderStars = (rating: number) => {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+  // const renderStars = (rating: number) => {
+  //   const fullStars = Math.floor(rating);
+  //   const hasHalfStar = rating % 1 >= 0.5;
+  //   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
     
-    return (
-      <>
-        {/* Full stars */}
-        {[...Array(fullStars)].map((_, i) => (
-          <span key={`full-${i}`} className="text-yellow-400">★</span>
-        ))}
+  //   return (
+  //     <>
+  //       {/* Full stars */}
+  //       {[...Array(fullStars)].map((_, i) => (
+  //         <span key={`full-${i}`} className="text-yellow-400">★</span>
+  //       ))}
         
-        {/* Half star */}
-        {hasHalfStar && (
-          <span key="half" className="text-yellow-400">★</span>
-        )}
+  //       {/* Half star */}
+  //       {hasHalfStar && (
+  //         <span key="half" className="text-yellow-400">★</span>
+  //       )}
         
-        {/* Empty stars */}
-        {[...Array(emptyStars)].map((_, i) => (
-          <span key={`empty-${i}`} className="text-gray-300">★</span>
-        ))}
-      </>
-    );
-  };
+  //       {/* Empty stars */}
+  //       {[...Array(emptyStars)].map((_, i) => (
+  //         <span key={`empty-${i}`} className="text-gray-300">★</span>
+  //       ))}
+  //     </>
+  //   );
+  // };
 
   if (loading) {
     return (
@@ -126,14 +126,14 @@ export default function BestSelling() {
               </div>
               <div className="p-8">
                 <h3 className="font-bold text-2xl text-secondary mb-4">{product.name}</h3>
-                <div className="flex items-center gap-2 mb-6">
+                {/* <div className="flex items-center gap-2 mb-6">
                   <div className="flex gap-1 text-lg">
                     {renderStars(product.rating)}
                   </div>
                   <span className="text-sm text-muted-foreground">
                     {product.rating > 0 ? `(${product.rating.toFixed(1)})` : '(0.0)'}
                   </span>
-                </div>
+                </div> */}
                 <button className="w-full bg-primary text-primary-foreground py-3 rounded-full hover:bg-accent transition-all duration-300 font-bold text-lg transform hover:scale-105">
                   Learn More
                 </button>

@@ -16,9 +16,12 @@ interface DisplayTestimonial {
 export default function ClientTestimonials() {
   const [testimonials, setTestimonials] = useState<DisplayTestimonial[]>([])
   const [loading, setLoading] = useState(true)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isHovered, setIsHovered] = useState(false)
   const sectionRef = useRef<HTMLDivElement>(null)
   const speedMs = 35000
   const [isInView, setIsInView] = useState(false)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     const fetchTestimonials = async () => {
@@ -31,63 +34,13 @@ export default function ClientTestimonials() {
           quote: item.quote,
           author: item.author,
           company: item.company,
-          photo: "/placeholder-user.jpg", // Default placeholder
+          photo: item.logo || "/placeholder-user.jpg", // Use logo from testimonial or default placeholder
           rating: item.rating
         }))
         
         setTestimonials(displayTestimonials)
       } catch (error) {
         console.error('Error fetching testimonials:', error)
-        // Fallback to mock data in case of error
-        setTestimonials([
-          {
-            quote:
-              "ProKidTek transformed our IT infrastructure. Their team was professional, responsive, and delivered exactly what we needed.",
-            author: "James Wilson",
-            company: "TechCorp",
-            photo: "/professional-man-ceo.jpg",
-            rating: 5,
-          },
-          {
-            quote:
-              "Outstanding service and support. ProKidTek has been a reliable partner for our technology needs for over 5 years.",
-            author: "Maria Garcia",
-            company: "GlobalSystems",
-            photo: "/professional-woman-tech.jpg",
-            rating: 5,
-          },
-          {
-            quote:
-              "The quality of products and expertise of the team is unmatched. Highly recommended for any business looking for tech solutions.",
-            author: "David Chen",
-            company: "InnovateLabs",
-            photo: "/professional-man-sales.jpg",
-            rating: 5,
-          },
-          {
-            quote:
-              "Exceptional customer service and product quality. ProKidTek goes above and beyond to ensure customer satisfaction.",
-            author: "Sarah Johnson",
-            company: "DigitalFirst",
-            photo: "/professional-woman-service.jpg",
-            rating: 5,
-          },
-          {
-            quote:
-              "We've been working with ProKidTek for 3 years and they consistently deliver high-quality products and excellent support.",
-            author: "Ahmed Hassan",
-            company: "TechVision",
-            photo: "/professional-man-ceo.jpg",
-            rating: 5,
-          },
-          {
-            quote: "ProKidTek's commitment to excellence and innovation makes them our preferred technology partner.",
-            author: "Lisa Anderson",
-            company: "FutureWorks",
-            photo: "/professional-woman-tech.jpg",
-            rating: 5,
-          },
-        ])
       } finally {
         setLoading(false)
       }
@@ -95,6 +48,42 @@ export default function ClientTestimonials() {
 
     fetchTestimonials()
   }, [])
+
+  // Auto-rotate testimonials for carousel view
+  useEffect(() => {
+    const startAutoRotate = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+      
+      intervalRef.current = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % testimonials.length)
+      }, 5000) // Rotate every 5 seconds
+    }
+
+    if (testimonials.length > 0) {
+      startAutoRotate()
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [testimonials.length])
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index)
+    
+    // Reset the auto-rotate timer
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+    }
+    
+    intervalRef.current = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % testimonials.length)
+    }, 5000)
+  }
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -134,20 +123,61 @@ export default function ClientTestimonials() {
             </p>
           </div>
           
-          {/* Row A */}
-          <div className="relative overflow-hidden rounded-3xl">
-            <div
-              className="flex gap-6 will-change-transform"
-              style={{ animation: isInView ? `testi-marquee-left ${speedMs}ms linear infinite` : "none" }}
-            >
-              {rowA.map((t, idx) => (
-                <TestimonialCard key={`a-${idx}`} t={t} />
+          {/* Carousel View for Mobile */}
+          <div className="md:hidden relative overflow-hidden rounded-3xl mb-8">
+            <div className="relative h-80">
+              {testimonials.map((t, idx) => (
+                <div 
+                  key={idx}
+                  className={`absolute inset-0 transition-opacity duration-500 ${
+                    idx === currentIndex ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  <TestimonialCard t={t} />
+                </div>
+              ))}
+            </div>
+            
+            {/* Dots indicator for mobile */}
+            <div className="flex justify-center mt-6 space-x-2">
+              {testimonials.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => goToSlide(idx)}
+                  className={`w-3 h-3 rounded-full transition-all ${
+                    idx === currentIndex ? 'bg-primary' : 'bg-gray-300'
+                  }`}
+                  aria-label={`Go to testimonial ${idx + 1}`}
+                />
               ))}
             </div>
           </div>
+          
+          {/* Continuous Marquee for Desktop with Auto Slide Animation */}
+          <div 
+            className="hidden md:block relative overflow-hidden rounded-3xl"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <div
+              className="flex gap-6"
+              style={{ 
+                animation: isInView && !isHovered ? `slide-alternate 30s linear infinite alternate` : "none",
+                width: "fit-content",
+              }}
+            >
+              {testimonials.map((t, idx) => (
+                <TestimonialCard key={idx} t={t} />
+              ))}
+            </div>
+            
+          </div>
 
           <style>{`
-            @keyframes testi-marquee-left { 0% { transform: translateX(0) } 100% { transform: translateX(-50%) } }
+            @keyframes slide-alternate { 
+              0% { transform: translateX(0); } 
+              100% { transform: translateX(-50%); } 
+            }
             @keyframes testi-pulse { 0%,100% { transform: scale(1) } 50% { transform: scale(1.06) } }
           `}</style>
         </div>
@@ -163,7 +193,16 @@ function TestimonialCard({ t }: { t: DisplayTestimonial }) {
         <div className="flex">
           {/* Left: Image (half width) */}
           <div className="w-1/2 h-56 sm:h-64 md:h-72">
-            <img src={t.photo || '/placeholder-user.jpg'} alt={t.author} className="w-full h-full object-cover" />
+            <img 
+              src={t.photo || '/placeholder-user.jpg'} 
+              alt={t.author} 
+              className="w-full h-full object-cover" 
+              onError={(e) => {
+                // Fallback to placeholder if image fails to load
+                const target = e.target as HTMLImageElement;
+                target.src = '/placeholder-user.jpg';
+              }}
+            />
           </div>
           {/* Right: Content */}
           <div className="w-1/2 p-6 flex flex-col">

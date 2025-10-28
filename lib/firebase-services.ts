@@ -197,6 +197,18 @@ export const deleteNewArrival = async (id: string): Promise<boolean> => {
   }
 }
 
+// Add update function for new arrivals
+export const updateNewArrival = async (id: string, newArrival: Partial<NewArrival>): Promise<boolean> => {
+  try {
+    const docRef = doc(newArrivalsCollection, id)
+    await updateDoc(docRef, newArrival)
+    return true
+  } catch (error) {
+    console.error('Error updating new arrival:', error)
+    return false
+  }
+}
+
 // Best Selling Services
 export const getBestSelling = async (): Promise<BestSelling[]> => {
   try {

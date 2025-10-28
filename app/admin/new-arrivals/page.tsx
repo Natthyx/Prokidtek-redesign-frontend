@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Plus, Edit2, Trash2, X, Loader2 } from "lucide-react"
 import FileUpload from "@/components/ui/file-upload"
-import { getNewArrivals, addNewArrival, deleteNewArrival, getProducts } from "@/lib/firebase-services"
+import { getNewArrivals, addNewArrival, deleteNewArrival, getProducts, updateNewArrival } from "@/lib/firebase-services"
 import { NewArrival as FirebaseNewArrival, Product } from "@/lib/types"
 import {
   AlertDialog,
@@ -56,10 +56,21 @@ export default function NewArrivalsAdmin() {
       router.push("/admin/login")
     } else {
       setIsAuthenticated(true)
-      fetchAllProducts() // Fetch all products first
-      fetchNewArrivals()
+      fetchData() // Fetch all data
     }
   }, [router])
+
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      await fetchAllProducts() // Fetch all products first
+      await fetchNewArrivals() // Then fetch arrivals
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const fetchAllProducts = async () => {
     try {
@@ -72,7 +83,9 @@ export default function NewArrivalsAdmin() {
 
   const fetchNewArrivals = async () => {
     try {
-      setLoading(true)
+      // Refresh products first to ensure we have the latest data
+      await fetchAllProducts()
+      
       const data = await getNewArrivals()
       
       // Transform Firebase NewArrival to display format by fetching actual product data
@@ -112,8 +125,6 @@ export default function NewArrivalsAdmin() {
       setArrivals(displayData)
     } catch (error) {
       console.error('Error fetching new arrivals:', error)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -165,11 +176,23 @@ export default function NewArrivalsAdmin() {
           dateAdded: new Date()
         }
 
-        const arrivalId = await addNewArrival(newArrivalData)
-        if (arrivalId) {
-          await fetchNewArrivals() // Refresh the arrivals list
+        if (editingId) {
+          // Update existing new arrival
+          const success = await updateNewArrival(editingId, newArrivalData)
+          if (success) {
+            await fetchNewArrivals() // Refresh the arrivals list
+            setEditingId(null)
+          } else {
+            alert('Failed to update new arrival')
+          }
         } else {
-          alert('Failed to add new arrival')
+          // Add new new arrival
+          const arrivalId = await addNewArrival(newArrivalData)
+          if (arrivalId) {
+            await fetchNewArrivals() // Refresh the arrivals list
+          } else {
+            alert('Failed to add new arrival')
+          }
         }
         setFormData({ productId: "", category: "", description: "", specs: "", image: "" }) // Reset form
         setShowModal(false)

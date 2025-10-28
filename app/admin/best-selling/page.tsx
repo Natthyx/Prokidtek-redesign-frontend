@@ -55,10 +55,21 @@ export default function BestSellingAdmin() {
       router.push("/admin/login")
     } else {
       setIsAuthenticated(true)
-      fetchAllProducts() // Fetch all products first
-      fetchBestSelling()
+      fetchData() // Fetch all data
     }
   }, [router])
+
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      await fetchAllProducts() // Fetch all products first
+      await fetchBestSelling() // Then fetch best selling products
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const fetchAllProducts = async () => {
     try {

@@ -62,11 +62,33 @@ export default function ClientReviews() {
           <p className="text-lg md:text-xl text-foreground mb-12 leading-relaxed max-w-3xl mx-auto">"{review.quote}"</p>
 
           <div className="flex flex-col items-center gap-4 mb-12">
-            <img
-              src={(review as any).photo || "/placeholder-user.jpg"}
-              alt={review.author}
-              className="w-28 h-28 rounded-full object-cover shadow-xl border-2 border-primary"
-            />
+            <div className="relative">
+              <img
+                src={review.logo || "/placeholder-user.jpg"}
+                alt={review.author}
+                className="w-28 h-28 rounded-full object-cover shadow-xl border-2 border-primary"
+                onError={(e) => {
+                  // Fallback to placeholder if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/placeholder-user.jpg';
+                }}
+              />
+              {/* Company logo badge */}
+              {review.logo && (
+                <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-lg border border-primary">
+                  <img 
+                    src={review.logo} 
+                    alt={review.company} 
+                    className="w-8 h-8 object-contain" 
+                    onError={(e) => {
+                      // Fallback to placeholder if image fails to load
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/placeholder-user.jpg';
+                    }}
+                  />
+                </div>
+              )}
+            </div>
             <div>
               <p className="font-bold text-xl text-primary">{review.author}</p>
               <p className="text-foreground/70">{review.company}</p>

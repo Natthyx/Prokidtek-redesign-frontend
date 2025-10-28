@@ -3,15 +3,28 @@
 import { useEffect, useState } from "react"
 import { ChevronDown } from "lucide-react"
 import Image from "next/image"
+import { getTestimonials } from "@/lib/firebase-services"
+import { Testimonial } from "@/lib/types"
 
 export default function ClientLogos() {
   const [isVisible, setIsVisible] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([])
 
   useEffect(() => {
     setIsVisible(true)
+    fetchTestimonials()
   }, [])
+
+  const fetchTestimonials = async () => {
+    try {
+      const data = await getTestimonials()
+      setTestimonials(data)
+    } catch (error) {
+      console.error('Error fetching testimonials:', error)
+    }
+  }
 
   const clients = [
     { name: "TechCorp", image: "/tech-company-logo.jpg" },
@@ -165,6 +178,13 @@ export default function ClientLogos() {
 
   const floatingClients = clients.slice(0, 5)
 
+  // Get unique company logos from testimonials
+  const companyLogos = testimonials
+    .filter((t, index, self) => 
+      index === self.findIndex((t2) => t2.company === t.company)
+    )
+    .slice(0, 8) // Limit to 8 logos for display
+
   return (
     <section className="py-20 px-4 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
@@ -188,32 +208,66 @@ export default function ClientLogos() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-          {clients.map((client, idx) => (
-            <div
-              key={client.name}
-              className={`bg-card rounded-2xl p-8 border-2 border-border hover:shadow-2xl transition-all duration-500 transform hover:scale-110 hover:-translate-y-2 cursor-pointer group shadow-lg ${
-                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-              }`}
-              style={{
-                transitionDelay: `${idx * 50}ms`,
-              }}
-            >
-              <div className="text-center">
-                <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:shadow-lg group-hover:shadow-primary/50 transition-all duration-300 overflow-hidden">
-                  <Image
-                    src={client.image || "/placeholder.svg"}
-                    alt={client.name}
-                    width={64}
-                    height={64}
-                    className="w-full h-full object-cover"
-                  />
+          {companyLogos.length > 0 ? (
+            companyLogos.map((testimonial, idx) => (
+              <div
+                key={testimonial.id}
+                className={`bg-card rounded-2xl p-8 border-2 border-border hover:shadow-2xl transition-all duration-500 transform hover:scale-110 hover:-translate-y-2 cursor-pointer group shadow-lg ${
+                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+                }`}
+                style={{
+                  transitionDelay: `${idx * 50}ms`,
+                }}
+              >
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:shadow-lg group-hover:shadow-primary/50 transition-all duration-300 overflow-hidden">
+                    {testimonial.logo ? (
+                      <img
+                        src={testimonial.logo}
+                        alt={testimonial.company}
+                        width={64}
+                        height={64}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+                    )}
+                  </div>
+                  <p className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">
+                    {testimonial.company}
+                  </p>
                 </div>
-                <p className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">
-                  {client.name}
-                </p>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            // Fallback to original clients if no testimonials with logos
+            clients.map((client, idx) => (
+              <div
+                key={client.name}
+                className={`bg-card rounded-2xl p-8 border-2 border-border hover:shadow-2xl transition-all duration-500 transform hover:scale-110 hover:-translate-y-2 cursor-pointer group shadow-lg ${
+                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+                }`}
+                style={{
+                  transitionDelay: `${idx * 50}ms`,
+                }}
+              >
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:shadow-lg group-hover:shadow-primary/50 transition-all duration-300 overflow-hidden">
+                    <Image
+                      src={client.image || "/placeholder.svg"}
+                      alt={client.name}
+                      width={64}
+                      height={64}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <p className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">
+                    {client.name}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="text-center mb-8">

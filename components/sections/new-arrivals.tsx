@@ -70,30 +70,30 @@ export default function NewArrivals() {
   // }
 
   // Function to render star ratings with proper half-star support
-  const renderStars = (rating: number) => {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+  // const renderStars = (rating: number) => {
+  //   const fullStars = Math.floor(rating);
+  //   const hasHalfStar = rating % 1 >= 0.5;
+  //   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
     
-    return (
-      <>
-        {/* Full stars */}
-        {[...Array(fullStars)].map((_, i) => (
-          <span key={`full-${i}`} className="text-yellow-400">★</span>
-        ))}
+  //   return (
+  //     <>
+  //       {/* Full stars */}
+  //       {[...Array(fullStars)].map((_, i) => (
+  //         <span key={`full-${i}`} className="text-yellow-400">★</span>
+  //       ))}
         
-        {/* Half star */}
-        {hasHalfStar && (
-          <span key="half" className="text-yellow-400">★</span>
-        )}
+  //       {/* Half star */}
+  //       {hasHalfStar && (
+  //         <span key="half" className="text-yellow-400">★</span>
+  //       )}
         
-        {/* Empty stars */}
-        {[...Array(emptyStars)].map((_, i) => (
-          <span key={`empty-${i}`} className="text-gray-300">★</span>
-        ))}
-      </>
-    );
-  };
+  //       {/* Empty stars */}
+  //       {[...Array(emptyStars)].map((_, i) => (
+  //         <span key={`empty-${i}`} className="text-gray-300">★</span>
+  //       ))}
+  //     </>
+  //   );
+  // };
 
   if (loading) {
     return (
@@ -187,14 +187,14 @@ export default function NewArrivals() {
                   </h3>
                   
                   {/* Rating Display */}
-                  <div className="flex items-center justify-center gap-1 mb-3">
+                  {/* <div className="flex items-center justify-center gap-1 mb-3">
                     <div className="flex text-xs">
                       {renderStars(product.rating)}
                     </div>
                     <span className="text-xs text-gray-300">
                       {product.rating > 0 ? product.rating.toFixed(1) : '0.0'}
                     </span>
-                  </div>
+                  </div> */}
                   
                   <button className="w-full bg-white text-black py-2 px-4 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105">
                     See More

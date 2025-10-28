@@ -11,6 +11,11 @@ export const metadata: Metadata = {
   title: "ProKidTek - Tech Store",
   description: "Premium laptops, desktops, network devices, and audio equipment",
   generator: "v0.app",
+  icons: {
+        icon: '/prokid.png',
+        shortcut: '/prokid.png', 
+        apple: '/prokid.png', 
+      },
 }
 
 export default function RootLayout({

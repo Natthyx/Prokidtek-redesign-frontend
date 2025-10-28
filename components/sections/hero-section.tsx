@@ -23,7 +23,7 @@ export default function HeroSection() {
       <div className="relative h-full flex items-center justify-start text-left px-4 md:px-10">
         <div className="max-w-2xl">
           <h1
-            className={`text-4xl md:text-6xl font-bold text-white mb-4 text-balance transition-all duration-1000 ${
+            className={`text-2xl md:text-6xl font-bold text-white mb-4 text-balance transition-all duration-1000 ${
               isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
